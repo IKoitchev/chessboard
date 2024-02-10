@@ -1,0 +1,17 @@
+.black {
+  background-color: black;
+  color: white;
+}
+
+.white {
+  background-color: white;
+  color: black;
+}
+
+.square {
+  width: calc(12% - 2px);
+  height: calc(12%);
+  max-width: 100px;
+  max-height: 100px;
+  box-sizing: border-box;
+}

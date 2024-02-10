@@ -1,0 +1,26 @@
+.chessboard {
+  width: 600px;
+  height: 600px;
+  min-width: 600px;
+  border-style: dashed;
+  display: flex;
+  flex-wrap: wrap;
+}
+.label {
+  box-sizing: border-box;
+  background-color: wheat;
+  text-align: center;
+}
+.rank {
+  width: calc(4%);
+  height: calc(12%);
+  /* margin-right: 2px; */
+}
+.file {
+  width: calc(12% - 2px);
+  height: calc(4%);
+}
+.corner {
+  width: calc(4%);
+  height: calc(4%);
+}

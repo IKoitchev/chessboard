@@ -23,9 +23,4 @@ declare module "@chessboard/types" {
     type: PieceType;
   };
   type PieceType = "Pawn" | "King" | "Bishop" | "Queen" | "Knight" | "Rook";
-
-  type CreateMoveContext = {
-    piece: Piece;
-    target: Square;
-  };
 }

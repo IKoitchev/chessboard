@@ -1,12 +1,15 @@
 import { Color, Piece, Square } from "@chessboard/types";
 import { letters, numbers } from "./squares";
+import { CalcMove } from "dto";
+import { squareHasPiece } from "./moveUtils";
 
-export function getHorizontalAndVerticalMoves(
-  start: Square,
-  pieces: Piece[],
-  pieceColor: Color
-) {
-  const { rank, file } = start;
+export function getHorizontalAndVerticalMoves(ctx: CalcMove) {
+  const {
+    start: { rank, file },
+    color: pieceColor,
+    pieces,
+    adjacentOnly,
+  } = ctx;
 
   let moves: Square[] = [];
 
@@ -15,22 +18,13 @@ export function getHorizontalAndVerticalMoves(
   const maxDistanceRight = 7 - letters.indexOf(file);
   const maxDistanceLeft = letters.indexOf(file);
 
-  console.log("start", rank, file);
-  // console.log(pieces.length);
-
-  console.log("maxDistanceDown", maxDistanceDown);
-  console.log("maxDistanceUp", maxDistanceUp);
-  console.log("maxDistanceLeft", maxDistanceLeft);
-  console.log("maxDistanceRight", maxDistanceRight);
-
   // Right
   for (let n = 0; n < maxDistanceRight; n++) {
-    // console.log("right");
     const square: Square = {
       rank: rank,
       file: letters[letters.indexOf(file) + n + 1],
     };
-    // console.log(square);
+
     if (
       pieces.find(
         (p) =>
@@ -39,28 +33,24 @@ export function getHorizontalAndVerticalMoves(
           p.color === pieceColor
       )
     ) {
-      console.log("breaking", square);
       break;
     }
-
-    console.log("adding");
     moves.push(square);
 
-    if (pieces.find((p) => p.file === square.file && p.rank === square.rank)) {
-      console.log("breaking later", square);
+    if (
+      pieces.find((p) => p.file === square.file && p.rank === square.rank) ||
+      adjacentOnly
+    ) {
       break;
     }
   }
 
   // Left
   for (let n = 0; n < maxDistanceLeft; n++) {
-    // console.log("left", maxDistanceLeft);
-    console.log(file, letters.indexOf(file), letters[letters.indexOf(file)]);
     const square: Square = {
       rank: rank,
       file: letters[letters.indexOf(file) - n - 1],
     };
-    // console.log(square);
     if (
       pieces.find(
         (p) =>
@@ -69,27 +59,24 @@ export function getHorizontalAndVerticalMoves(
           p.color === pieceColor
       )
     ) {
-      console.log("breaking", square);
       break;
     }
-
-    console.log("adding");
     moves.push(square);
 
-    if (pieces.find((p) => p.file === square.file && p.rank === square.rank)) {
-      console.log("breaking later", square);
+    if (
+      pieces.find((p) => p.file === square.file && p.rank === square.rank) ||
+      adjacentOnly
+    ) {
       break;
     }
   }
 
   // Up
   for (let n = 0; n < maxDistanceUp; n++) {
-    // console.log("up");
     const square: Square = {
       rank: numbers[numbers.indexOf(rank) + n + 1],
       file: file,
     };
-    // console.log(square);
     if (
       pieces.find(
         (p) =>
@@ -98,27 +85,24 @@ export function getHorizontalAndVerticalMoves(
           p.color === pieceColor
       )
     ) {
-      console.log("breaking", square);
       break;
     }
-
-    console.log("adding");
     moves.push(square);
 
-    if (pieces.find((p) => p.file === square.file && p.rank === square.rank)) {
-      console.log("breaking later", square);
+    if (
+      pieces.find((p) => p.file === square.file && p.rank === square.rank) ||
+      adjacentOnly
+    ) {
       break;
     }
   }
 
   // Down
   for (let n = 0; n < maxDistanceDown; n++) {
-    // console.log("down");
     const square: Square = {
       rank: numbers[numbers.indexOf(rank) - n - 1],
       file: file,
     };
-    // console.log(square);
     if (
       pieces.find(
         (p) =>
@@ -127,27 +111,27 @@ export function getHorizontalAndVerticalMoves(
           p.color === pieceColor
       )
     ) {
-      console.log("breaking", square);
       break;
     }
 
-    console.log("adding");
     moves.push(square);
 
-    if (pieces.find((p) => p.file === square.file && p.rank === square.rank)) {
-      console.log("breaking later", square);
+    if (
+      pieces.find((p) => p.file === square.file && p.rank === square.rank) ||
+      adjacentOnly
+    ) {
       break;
     }
   }
-  console.log("moves", moves);
   return moves;
 }
-export function getDiagonalMoves(
-  start: Square,
-  pieces: Piece[],
-  pieceColor: Color
-) {
-  const { rank, file } = start;
+export function getDiagonalMoves(ctx: CalcMove) {
+  const {
+    start: { rank, file },
+    color: pieceColor,
+    pieces,
+    adjacentOnly,
+  } = ctx;
 
   let moves: Square[] = [];
 
@@ -158,12 +142,10 @@ export function getDiagonalMoves(
 
   // Up-Right
   for (let n = 0; n < maxDistanceRight && n < maxDistanceUp; n++) {
-    // console.log("up-right");
     const square: Square = {
       rank: numbers[numbers.indexOf(rank) + n + 1],
       file: letters[letters.indexOf(file) + n + 1],
     };
-    // console.log(square);
     if (
       pieces.find(
         (p) =>
@@ -172,27 +154,25 @@ export function getDiagonalMoves(
           p.color === pieceColor
       )
     ) {
-      console.log("breaking", square);
       break;
     }
 
-    console.log("adding");
     moves.push(square);
 
-    if (pieces.find((p) => p.file === square.file && p.rank === square.rank)) {
-      console.log("breaking later", square);
+    if (
+      pieces.find((p) => p.file === square.file && p.rank === square.rank) ||
+      adjacentOnly
+    ) {
       break;
     }
   }
 
   // Down-Right
   for (let n = 0; n < maxDistanceRight && n < maxDistanceDown; n++) {
-    // console.log("down-right");
     const square: Square = {
       rank: numbers[numbers.indexOf(rank) - n - 1],
       file: letters[letters.indexOf(file) + n + 1],
     };
-    // console.log(square);
     if (
       pieces.find(
         (p) =>
@@ -201,27 +181,24 @@ export function getDiagonalMoves(
           p.color === pieceColor
       )
     ) {
-      console.log("breaking", square);
       break;
     }
-
-    console.log("adding");
     moves.push(square);
 
-    if (pieces.find((p) => p.file === square.file && p.rank === square.rank)) {
-      console.log("breaking later", square);
+    if (
+      pieces.find((p) => p.file === square.file && p.rank === square.rank) ||
+      adjacentOnly
+    ) {
       break;
     }
   }
 
   // Up-Left
   for (let n = 0; n < maxDistanceLeft && n < maxDistanceUp; n++) {
-    // console.log("left-up");
     const square: Square = {
       rank: numbers[numbers.indexOf(rank) + n + 1],
       file: letters[letters.indexOf(file) - n - 1],
     };
-    // console.log(square);
     if (
       pieces.find(
         (p) =>
@@ -230,26 +207,23 @@ export function getDiagonalMoves(
           p.color === pieceColor
       )
     ) {
-      console.log("breaking", square);
       break;
     }
-
-    console.log("adding");
     moves.push(square);
 
-    if (pieces.find((p) => p.file === square.file && p.rank === square.rank)) {
-      console.log("breaking later", square);
+    if (
+      pieces.find((p) => p.file === square.file && p.rank === square.rank) ||
+      adjacentOnly
+    ) {
       break;
     }
   }
   // Down-Left
   for (let n = 0; n < maxDistanceLeft && n < maxDistanceDown; n++) {
-    // console.log("left-down");
     const square: Square = {
       rank: numbers[numbers.indexOf(rank) - n - 1],
       file: letters[letters.indexOf(file) - n - 1],
     };
-    // console.log(square);
     if (
       pieces.find(
         (p) =>
@@ -258,18 +232,133 @@ export function getDiagonalMoves(
           p.color === pieceColor
       )
     ) {
-      console.log("breaking", square);
       break;
     }
-
-    console.log("adding");
     moves.push(square);
 
-    if (pieces.find((p) => p.file === square.file && p.rank === square.rank)) {
-      console.log("breaking later", square);
+    if (
+      pieces.find((p) => p.file === square.file && p.rank === square.rank) ||
+      adjacentOnly
+    ) {
       break;
     }
   }
-  console.log("moves", moves);
+  return moves;
+}
+export function getLMoves(ctx: CalcMove) {
+  const {
+    start: { rank, file },
+    color: pieceColor,
+    pieces,
+  } = ctx;
+
+  let moves: Square[] = [];
+
+  const coordinates = [
+    [2, 1],
+    [2, -1],
+    [-2, 1],
+    [-2, -1],
+    [1, 2],
+    [-1, 2],
+    [1, -2],
+    [-1, -2],
+  ];
+
+  for (const [x, y] of coordinates) {
+    // new indexes
+    const indexF = letters.indexOf(file) + x;
+    const indexR = numbers.indexOf(rank) + y;
+
+    if (indexR <= 7 && indexR >= 0 && indexF <= 7 && indexF >= 0) {
+      const square: Square = { file: letters[indexF], rank: numbers[indexR] };
+
+      if (
+        !pieces.find(
+          (piece) =>
+            piece.file === square.file &&
+            piece.rank === square.rank &&
+            piece.color === pieceColor
+        )
+      ) {
+        moves.push(square);
+      }
+    }
+  }
+
+  return moves;
+}
+
+export function getPawnMoves(ctx: CalcMove) {
+  const {
+    start: { rank, file },
+    color: pieceColor,
+    pieces,
+  } = ctx;
+  const moves: Square[] = [];
+
+  // startRankIndex, promRankIndex, captureOffset
+  const [startRankIndex, moveOffset] =
+    pieceColor === "white" ? [1, 1] : [6, -1];
+
+  console.log("offsets", startRankIndex, moveOffset);
+  const isBlocked = (moveOffset: number) => {
+    if (
+      pieces.find(
+        (p) =>
+          p.file === file &&
+          numbers.indexOf(p.rank) === numbers.indexOf(rank) + moveOffset
+      )
+    ) {
+      return true;
+    }
+    return false;
+  };
+
+  if (!isBlocked(moveOffset)) {
+    // console.log(file, numbers[numbers.indexOf(rank) + moveOffset]);
+    moves.push({
+      file,
+      rank: numbers[numbers.indexOf(rank) + moveOffset],
+    });
+    if (
+      numbers.indexOf(rank) === startRankIndex &&
+      !isBlocked(moveOffset * 2)
+    ) {
+      moves.push({
+        file,
+        rank: numbers[numbers.indexOf(rank) + moveOffset * 2],
+      });
+    }
+  }
+
+  // Capturing
+  const [left, right] = [
+    {
+      file: letters[letters.indexOf(file) - moveOffset],
+      rank: numbers[numbers.indexOf(rank) + moveOffset],
+    },
+    {
+      file: letters[letters.indexOf(file) + moveOffset],
+      rank: numbers[numbers.indexOf(rank) + moveOffset],
+    },
+  ];
+
+  console.log(left, right);
+  if (
+    left.file &&
+    left.rank &&
+    squareHasPiece(left, pieces, pieceColor === "white" ? "black" : "white")
+  ) {
+    moves.push(left);
+  }
+
+  if (
+    right.file &&
+    right.rank &&
+    squareHasPiece(right, pieces, pieceColor === "white" ? "black" : "white")
+  ) {
+    moves.push(right);
+  }
   return moves;
 }

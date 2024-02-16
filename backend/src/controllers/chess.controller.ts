@@ -7,7 +7,10 @@ import { Squares } from "../utils/squares";
 import {
   getDiagonalMoves,
   getHorizontalAndVerticalMoves,
+  getLMoves,
+  getPawnMoves,
 } from "../utils/moves";
+import { makeMove } from "../utils/makeMove";
 
 const routerOpts: Router.IRouterOptions = {
   prefix: "/chessboard",
@@ -28,34 +31,24 @@ router.get("/start", async (ctx: Context) => {
 router.post("/move", async (ctx: Context) => {
   const { piece, target, state } = ctx.request.body as MakeMoveContext;
 
-  const board: Board = initBoard();
+  const result = makeMove({ piece, target, state });
 
-  const pc = board.pieces.find((p) => p.type === "Rook");
-
-  getHorizontalAndVerticalMoves(
-    { file: pc.file, rank: pc.rank },
-    board.pieces,
-    pc.color
-  );
-
-  ctx.body = "POST";
+  ctx.body = result;
 });
 
 router.get("/test", async (ctx: Context) => {
   const { piece, target, state } = ctx.request.body as MakeMoveContext;
 
-  const board: Board = initBoard();
+  const board = initBoard();
 
-  // const pc = board.pieces.find((p) => p.type === "Pawn");
+  const pawn = board.pieces.find((p) => p.type === "Pawn" && p.file === "e");
+  const result = makeMove({
+    piece: pawn,
+    target: { file: "e", rank: "4" },
+    state: board,
+  });
 
-  // getHorizontalAndVerticalMoves(
-  //   { file: "a", rank: "2" },
-  //   board.pieces,
-  //   "white"
-  // );
-  getDiagonalMoves({ file: "a", rank: "2" }, board.pieces, "white");
-
-  ctx.body = "POST";
+  ctx.body = result;
 });
 
 router.patch("/:movie_id", async (ctx: Context) => {

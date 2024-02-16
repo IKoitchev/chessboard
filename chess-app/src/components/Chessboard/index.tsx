@@ -37,7 +37,7 @@ const ChessBoard: FunctionComponent<ChessBoardProps> = ({ reverse }) => {
     }
 
     if (selectedPiece) {
-      const { data } = await request<BoardContext>({
+      const { data } = await request<Piece[]>({
         url: "/chessboard/move",
         method: "POST",
         data: {
@@ -46,9 +46,10 @@ const ChessBoard: FunctionComponent<ChessBoardProps> = ({ reverse }) => {
           state: { pieces: pieces },
         },
       });
-      setPieces(data.pieces);
+      // console.log(data);
+      setPieces(data);
 
-      console.log("unselecting");
+      // console.log("unselecting");
       setSelectedPiece(null);
     }
   };

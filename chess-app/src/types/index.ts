@@ -1,5 +1,5 @@
 export type Square = {
-  color: Color;
+  // color: Color;
   rank: Row;
   file: Column;
 };
@@ -11,7 +11,8 @@ export type Row = "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8";
 export type Column = "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h";
 
 export type Piece = {
-  position: Square | null;
+  rank: Row;
+  file: Column;
   color: Color;
   points: number;
   type: PieceType;
@@ -25,9 +26,7 @@ export type PieceType =
   | "Rook";
 
 export type BoardContext = {
-  squares: Square[][];
-  activePieces: Piece[];
-  capturesPieces: Piece[];
+  pieces: Piece[];
 };
 
 export type SquareContext = Square & {

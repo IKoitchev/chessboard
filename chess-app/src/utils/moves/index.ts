@@ -16,12 +16,11 @@ export function capture(piece: Piece): Piece {
   return {
     color: piece.color,
     points: piece.points,
-    position: null,
+    rank: piece.rank,
+    file: piece.file,
     type: piece.type,
   };
 }
 export function findPieceBySquare(pieces: Piece[], file: string, rank: string) {
-  return pieces.find(
-    (p) => p.position?.file === file && p.position?.rank === rank
-  );
+  if (pieces) return pieces.find((p) => p.file === file && p.rank === rank);
 }

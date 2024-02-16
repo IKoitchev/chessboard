@@ -10,7 +10,10 @@ import { squareHasPiece } from "./moveUtils";
 
 export function makeMove(ctx: MakeMoveContext) {
   const { piece, target, state } = ctx;
-  console.log(piece, target);
+
+  console.log("piece", piece);
+  console.log("target", target);
+
   const options: CalcMove = {
     start: { rank: piece.rank, file: piece.file },
     pieces: state.pieces,
@@ -56,13 +59,19 @@ export function makeMove(ctx: MakeMoveContext) {
   let updatedPieces = [...state.pieces];
 
   if (targetPiece) {
-    updatedPieces = state.pieces.splice(state.pieces.indexOf(targetPiece), 1);
+    updatedPieces = updatedPieces.filter(
+      (p) => !(p.file === targetPiece.file && p.rank === targetPiece.rank)
+    );
   }
 
-  updatedPieces[updatedPieces.indexOf(piece)] = { ...piece, ...target };
+  updatedPieces[
+    updatedPieces.findIndex(
+      (p) => p.file === piece.file && p.rank === piece.rank
+    )
+  ] = { ...piece, ...target };
 
-  console.log("updated", updatedPieces[updatedPieces.indexOf(piece)]);
-
+  // console.log("updated", updatedPieces[updatedPieces.indexOf(piece)]);
+  console.log("updatedP", updatedPieces);
   return updatedPieces;
 
   // check if check

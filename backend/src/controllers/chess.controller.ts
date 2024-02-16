@@ -33,6 +33,11 @@ router.post("/move", async (ctx: Context) => {
 
   const result = makeMove({ piece, target, state });
 
+  // console.log("piece", piece);
+  // console.log("target", target);
+  // console.log("state", state);
+  // console.log("result", result);
+  console.log(result[32]);
   ctx.body = result;
 });
 
@@ -48,7 +53,7 @@ router.get("/test", async (ctx: Context) => {
     state: board,
   });
 
-  ctx.body = result;
+  ctx.body = { pieces: result };
 });
 
 router.patch("/:movie_id", async (ctx: Context) => {

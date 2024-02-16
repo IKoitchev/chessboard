@@ -301,7 +301,6 @@ export function getPawnMoves(ctx: CalcMove) {
   const [startRankIndex, moveOffset] =
     pieceColor === "white" ? [1, 1] : [6, -1];
 
-  console.log("offsets", startRankIndex, moveOffset);
   const isBlocked = (moveOffset: number) => {
     if (
       pieces.find(
@@ -344,7 +343,6 @@ export function getPawnMoves(ctx: CalcMove) {
     },
   ];
 
-  console.log(left, right);
   if (
     left.file &&
     left.rank &&

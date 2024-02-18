@@ -25,10 +25,20 @@ export type PieceType =
   | "Knight"
   | "Rook";
 
-export type BoardContext = {
+export type GameContext = {
+  id: string;
+  playerWhite: Player;
+  playerBlack: Player;
+  isBlackTurn: boolean;
   pieces: Piece[];
 };
 
 export type SquareContext = Square & {
   piece?: Piece;
+};
+
+export type Player = {
+  id: string;
+  // name: string;
+  // ...
 };

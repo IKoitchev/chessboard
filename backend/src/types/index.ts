@@ -23,4 +23,15 @@ declare module "@chessboard/types" {
     type: PieceType;
   };
   type PieceType = "Pawn" | "King" | "Bishop" | "Queen" | "Knight" | "Rook";
+
+  type Game = {
+    id: string;
+    playerWhite: Player;
+    playerBlack: Player;
+    isBlackTurn: boolean;
+    pieces: Piece[];
+  };
+  type Player = {
+    id: string;
+  };
 }

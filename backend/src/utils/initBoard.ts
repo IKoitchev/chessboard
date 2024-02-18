@@ -19,7 +19,7 @@ export function initBoard(): Board {
   return board;
 }
 
-function generatePieces(): Piece[] {
+export function generatePieces(): Piece[] {
   let pieces: Piece[] = [];
 
   // Pawns

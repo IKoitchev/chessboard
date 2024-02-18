@@ -10,7 +10,7 @@ function App() {
       <Navbar />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<PlayPage />}></Route>
+          <Route path="/play/:gameId?" element={<PlayPage />}></Route>
         </Routes>
       </BrowserRouter>
     </>

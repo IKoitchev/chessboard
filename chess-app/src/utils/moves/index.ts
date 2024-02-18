@@ -5,7 +5,6 @@ export function areSameSquare(
   second: Square | null
 ): boolean {
   if (!first || !second) {
-    console.log("something is null");
     return false;
   }
 

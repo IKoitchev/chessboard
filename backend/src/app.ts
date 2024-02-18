@@ -3,6 +3,7 @@ import * as HttpStatus from "http-status-codes";
 import movieController from "./controllers/chess.controller";
 import cors from "@koa/cors";
 import bodyParser from "koa-bodyparser";
+import logger from "koa-logger";
 
 const app: Koa = new Koa();
 
@@ -23,6 +24,7 @@ app.use(async (ctx: Koa.Context, next: () => Promise<any>) => {
 
 // Initial route
 app.use(cors());
+app.use(logger());
 app.use(bodyParser());
 app.use(movieController.routes());
 app.use(movieController.allowedMethods());

@@ -1,4 +1,4 @@
-import { Square } from "@chessboard/types";
+import { Game, Piece, Square } from "@chessboard/types";
 import { CalcMove, MakeMoveContext } from "dto";
 import {
   getDiagonalMoves,
@@ -8,19 +8,29 @@ import {
 } from "./moves";
 import { squareHasPiece } from "./moveUtils";
 
-export function makeMove(ctx: MakeMoveContext) {
-  const { piece, target, state } = ctx;
+export function makeMove(piece: Piece, target: Square, game: Game): Game {
+  // const { piece, target, state } = ctx;
 
   console.log("piece", piece);
   console.log("target", target);
+  console.log("blackTurn & color piece", game.isBlackTurn, piece.color);
+
+  if (game.isBlackTurn !== (piece.color === "black")) {
+    console.log(`${piece.color}'s turn`);
+    return game;
+  }
+  console.log(`not ${piece.color}'s turn`);
 
   const options: CalcMove = {
     start: { rank: piece.rank, file: piece.file },
-    pieces: state.pieces,
+    pieces: game.pieces,
     color: piece.color,
   };
 
   let moves: Square[] = [];
+  let hasMoved: boolean;
+  let updatedPieces = [...game.pieces];
+  const targetPiece = squareHasPiece(target, game.pieces);
 
   switch (piece.type) {
     case "Pawn":
@@ -48,31 +58,57 @@ export function makeMove(ctx: MakeMoveContext) {
       moves = getHorizontalAndVerticalMoves(options);
       break;
   }
-  console.log("moves", moves);
+  // console.log("moves", moves);
 
   if (!moves.find((m) => m.file === target.file && m.rank === target.rank)) {
-    return state.pieces;
+    return game;
   }
 
-  const targetPiece = squareHasPiece(target, state.pieces);
-
-  let updatedPieces = [...state.pieces];
-
+  // Check if anything is captured
   if (targetPiece) {
     updatedPieces = updatedPieces.filter(
       (p) => !(p.file === targetPiece.file && p.rank === targetPiece.rank)
     );
   }
+  console.log(
+    "old",
+    updatedPieces[
+      updatedPieces.findIndex(
+        (p) => p.file === piece.file && p.rank === piece.rank
+      )
+    ]
+  );
 
-  updatedPieces[
+  const updPiece = (updatedPieces[
     updatedPieces.findIndex(
       (p) => p.file === piece.file && p.rank === piece.rank
     )
-  ] = { ...piece, ...target };
+  ] = { ...piece, ...target });
 
-  // console.log("updated", updatedPieces[updatedPieces.indexOf(piece)]);
-  console.log("updatedP", updatedPieces);
-  return updatedPieces;
+  console.log("upd p ", updPiece);
+
+  if (
+    updatedPieces[
+      updatedPieces.findIndex(
+        (p) => p.file === piece.file && p.rank === piece.rank
+      )
+    ]
+  ) {
+    console.log("hasn't moved");
+    // hasMoved = false;
+  } else {
+    console.log("has moved");
+    hasMoved = !game.isBlackTurn;
+  }
+
+  const updatedGame: Game = {
+    ...game,
+    pieces: updatedPieces,
+    isBlackTurn: hasMoved,
+  };
+
+  // console.log("updatedP", updatedPieces);
+  return updatedGame;
 
   // check if check
   // .....

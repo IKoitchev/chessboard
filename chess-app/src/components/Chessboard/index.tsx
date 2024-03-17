@@ -23,7 +23,7 @@ const ChessBoard: FunctionComponent<ChessBoardProps> = ({ reverse, game }) => {
   const [isBlackTurn, setBlackTurn] = useState<boolean>(false);
 
   useEffect(() => {
-    console.log(game);
+    // console.log(game);
 
     if (game) {
       console.log("setting pieces");
@@ -48,49 +48,53 @@ const ChessBoard: FunctionComponent<ChessBoardProps> = ({ reverse, game }) => {
         {
           piece: selectedPiece,
           target: { file: squareContext.file, rank: squareContext.rank },
-          // state: { pieces: pieces, id: game.id, isBlackTurn },
           gameId: game.id,
+          playerWhiteId: "1",
+          playerBlackId: "2",
         }
       );
       console.log(data);
       setPieces(data.pieces);
-
+      setBlackTurn((old) => !old);
       setSelectedPiece(null);
     }
   };
 
   return (
-    <div className="chessboard">
-      {(reverse ? [...numbers].reverse() : numbers).map((number, i) => {
-        return (
-          <>
-            <div key={i} className="label rank">
-              {number}
-            </div>
-            {(reverse ? [...letters].reverse() : letters).map((letter) => {
-              return (
-                <SquareComponent
-                  key={letter + number}
-                  file={letter as Column}
-                  rank={number as Row}
-                  piece={findPieceBySquare(pieces, letter, number)}
-                  onClick={handleClick}
-                />
-              );
-            })}
-          </>
-        );
-      })}
+    <>
+      {isBlackTurn ? "Black's turn" : "White's turn"}
+      <div className="chessboard">
+        {(reverse ? [...numbers].reverse() : numbers).map((number, i) => {
+          return (
+            <>
+              <div key={i} className="label rank">
+                {number}
+              </div>
+              {(reverse ? [...letters].reverse() : letters).map((letter) => {
+                return (
+                  <SquareComponent
+                    key={letter + number}
+                    file={letter as Column}
+                    rank={number as Row}
+                    piece={findPieceBySquare(pieces, letter, number)}
+                    onClick={handleClick}
+                  />
+                );
+              })}
+            </>
+          );
+        })}
 
-      <div className="corner"></div>
-      {(reverse ? [...letters].reverse() : letters).map((letter) => {
-        return (
-          <div key={letter} className="label file">
-            {letter.toLocaleUpperCase()}
-          </div>
-        );
-      })}
-    </div>
+        <div className="corner"></div>
+        {(reverse ? [...letters].reverse() : letters).map((letter) => {
+          return (
+            <div key={letter} className="label file">
+              {letter.toLocaleUpperCase()}
+            </div>
+          );
+        })}
+      </div>
+    </>
   );
 };
 

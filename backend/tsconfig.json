@@ -9,9 +9,10 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "esModuleInterop": true,
-    "baseUrl": "./src",
+    "baseUrl": "./",
     "paths": {
-      "@chessboard/types": ["./types/index.ts"]
+      "/src": ["./src/*"],
+      "@chessboard/types": ["./src/types/index.ts"]
     }
   }
 }

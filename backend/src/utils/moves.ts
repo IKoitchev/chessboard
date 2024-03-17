@@ -1,6 +1,6 @@
 import { Color, Piece, Square } from "@chessboard/types";
 import { letters, numbers } from "./squares";
-import { CalcMove } from "dto";
+import { CalcMove } from "src/dto";
 import { squareHasPiece } from "./moveUtils";
 
 export function getHorizontalAndVerticalMoves(ctx: CalcMove) {

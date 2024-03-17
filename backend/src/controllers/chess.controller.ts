@@ -1,8 +1,8 @@
-import { Board, Game } from "@chessboard/types";
+import { Board, Game, Move, Piece } from "@chessboard/types";
 import { Context } from "koa";
 import Router, { RouterContext } from "koa-router";
 import { generatePieces, initBoard } from "../utils/initBoard";
-import { MakeMoveContext } from "dto";
+import { MakeMoveContext } from "src/dto";
 import { Squares } from "../utils/squares";
 import {
   getDiagonalMoves,
@@ -12,6 +12,11 @@ import {
 } from "../utils/moves";
 import { makeMove } from "../utils/makeMove";
 import { Guid } from "js-guid";
+import * as path from "path";
+import sequelize from "../utils/sqlite";
+import { Game as GameModel } from "../models/game";
+import { Move as MoveModel } from "../models/move";
+import { getCurrentPosition } from "../utils/moveUtils";
 
 const routerOpts: Router.IRouterOptions = {
   prefix: "/chessboard",
@@ -19,72 +24,79 @@ const routerOpts: Router.IRouterOptions = {
 
 const router: Router = new Router(routerOpts);
 
-const games: Game[] = [];
-
 router.get("/play/:gameId", async (ctx: RouterContext) => {
   const {
     params: { gameId },
   } = ctx;
 
-  const game = games.find((g) => g.id === gameId);
+  const game = await GameModel.findOne({
+    where: { id: gameId, result: null },
+    include: [MoveModel],
+  });
 
-  ctx.body = game;
+  const position: Game = getCurrentPosition(game);
+
+  ctx.body = { ...position };
 });
 
 router.post("/play", async (ctx: RouterContext) => {
-  const newGame: Game = {
-    id: String(new Guid()),
-    pieces: generatePieces(),
-    playerBlack: { id: "pb" },
-    playerWhite: { id: "pw" },
-    isBlackTurn: false,
-  };
+  // Add metadata such as player names, passed from the context
+  const newGame = await GameModel.create({
+    playerBlackId: "black",
+    playerWhiteId: "white",
+  });
 
-  games.push(newGame);
-  console.log("number of games:", games.length);
+  const initialPieces = generatePieces();
 
-  ctx.body = newGame;
-});
-
-router.get("/start", async (ctx: Context) => {
-  const board: Board = initBoard();
-
-  ctx.body = board;
+  ctx.body = { ...newGame.dataValues, pieces: initialPieces };
 });
 
 router.post("/move", async (ctx: Context) => {
   const { piece, target, gameId } = ctx.request.body as MakeMoveContext;
 
-  // console.log("id", gameId);
-  // console.log("games", games);
-
-  let game = games.find((g) => g.id === gameId);
+  // Find the game
+  const game = await GameModel.findByPk(gameId, {
+    include: [MoveModel],
+  });
 
   if (!game) {
     console.log("game not found");
     ctx.throw(400);
   }
 
-  const result = makeMove(piece, target, game);
+  // TO-DO:
+  // Game model has no pieces but is required
+  const position: Game = getCurrentPosition(game);
 
-  games[games.findIndex((g) => g.id === gameId)] = { ...result };
+  // Checks whether the piece color matches the player who has the turn
+  // TO-DO: remove turn tracking from GameModel
+  if ((game.moves.length % 2 === 0) !== (piece.color === "white")) {
+    console.log(`It is not ${piece.color} player's turn!`);
+    ctx.throw(400, `It is not ${piece.color} player's turn!`);
+  }
 
-  ctx.body = result;
+  const afterMove: Game = makeMove(piece, target, { ...position });
+
+  if (afterMove.moves.length != game.moves.length) {
+    console.log("making turn");
+    await MoveModel.create({
+      gameId,
+      targetRank: target.rank,
+      targetFile: target.file,
+      piece: JSON.stringify(piece),
+    });
+  }
+
+  ctx.body = afterMove;
 });
 
 router.get("/test", async (ctx: Context) => {
-  const { piece, target, gameId } = ctx.request.body as MakeMoveContext;
+  const id = "a184004c-4710-4cde-a029-28bbcf597848";
 
-  const board = initBoard();
+  const game = await GameModel.findByPk(id, { include: [MoveModel] });
+  const { pieces } = getCurrentPosition(game);
 
-  const pawn = board.pieces.find((p) => p.type === "Pawn" && p.file === "e");
-  // const result = makeMove({
-  //   piece: pawn,
-  //   target: { file: "e", rank: "4" },
-  //   state: board,
-  // });
-
-  // ctx.body = { pieces: result };
+  ctx.body = {};
 });
 
 router.patch("/:movie_id", async (ctx: Context) => {

@@ -26,12 +26,19 @@ declare module "@chessboard/types" {
 
   type Game = {
     id: string;
-    playerWhite: Player;
-    playerBlack: Player;
-    isBlackTurn: boolean;
+    playerWhiteId: string;
+    playerBlackId: string;
     pieces: Piece[];
+    moves: Move[];
   };
   type Player = {
     id: string;
+  };
+  type Move = {
+    id: string;
+    targetFile: File;
+    targetRank: Rank;
+    piece: string;
+    gameId: string;
   };
 }

@@ -14,6 +14,6 @@ export type CalcMove = {
 };
 
 export type MoveResult = {
-  isWhiteTurn: boolean;
+  isBlackTurn: boolean;
   pieces: Piece[];
 };

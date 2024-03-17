@@ -1,7 +1,6 @@
 import { Board, Rank, File, Piece } from "@chessboard/types";
 import { Bishop, King, Knight, Pawn, Queen, Rook } from "../types/Pieces";
 import { Squares } from "./squares";
-import { mapPieces } from "./mapPieces";
 
 const numbers: Rank[] = ["1", "2", "3", "4", "5", "6", "7", "8"];
 const letters: File[] = ["a", "b", "c", "d", "e", "f", "g", "h"];

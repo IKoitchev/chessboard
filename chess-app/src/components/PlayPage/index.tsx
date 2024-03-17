@@ -21,10 +21,12 @@ export default function PlayPage() {
       `${baseURL}/chessboard/play`
     );
     console.log(newGame);
+    console.log("naving", `/play/${newGame.id}`);
     navigate(`/play/${newGame.id}`);
   };
 
   useEffect(() => {
+    console.log(gameId);
     if (gameId) {
       axios
         .get<GameContext>(`${baseURL}/chessboard/play/${gameId}`)
@@ -61,7 +63,9 @@ export default function PlayPage() {
 
       <div className="container">
         {game ? (
-          <ChessBoard reverse={isBlackPOV} isPractice={!gameId} game={game} />
+          <>
+            <ChessBoard reverse={isBlackPOV} isPractice={!gameId} game={game} />
+          </>
         ) : (
           <></>
         )}

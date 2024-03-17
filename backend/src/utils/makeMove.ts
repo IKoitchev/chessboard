@@ -1,5 +1,5 @@
-import { Game, Piece, Square } from "@chessboard/types";
-import { CalcMove, MakeMoveContext } from "dto";
+import { Game, Move, Piece, Square } from "@chessboard/types";
+import { CalcMove, MakeMoveContext } from "src/dto";
 import {
   getDiagonalMoves,
   getHorizontalAndVerticalMoves,
@@ -8,18 +8,18 @@ import {
 } from "./moves";
 import { squareHasPiece } from "./moveUtils";
 
-export function makeMove(piece: Piece, target: Square, game: Game): Game {
-  // const { piece, target, state } = ctx;
+type MoveProps = { piece: Piece; target: Square; game: Game };
 
+export function makeMove(piece: Piece, target: Square, game: Game): Game {
   console.log("piece", piece);
   console.log("target", target);
-  console.log("blackTurn & color piece", game.isBlackTurn, piece.color);
+  console.log("moves number & color piece", game.moves.length, piece.color);
 
-  if (game.isBlackTurn !== (piece.color === "black")) {
-    console.log(`${piece.color}'s turn`);
-    return game;
-  }
-  console.log(`not ${piece.color}'s turn`);
+  // if (game.isBlackTurn !== (piece.color === "black")) {
+  //   console.log(`${piece.color}'s turn`);
+  //   return game;
+  // }
+  // console.log(`not ${piece.color}'s turn`);
 
   const options: CalcMove = {
     start: { rank: piece.rank, file: piece.file },
@@ -27,40 +27,41 @@ export function makeMove(piece: Piece, target: Square, game: Game): Game {
     color: piece.color,
   };
 
-  let moves: Square[] = [];
-  let hasMoved: boolean;
+  let legalMoves: Square[] = [];
+  let hasMoved: boolean = false;
   let updatedPieces = [...game.pieces];
   const targetPiece = squareHasPiece(target, game.pieces);
 
   switch (piece.type) {
     case "Pawn":
-      moves = getPawnMoves(options);
+      legalMoves = getPawnMoves(options);
       break;
     case "King":
-      moves = [
+      legalMoves = [
         ...getDiagonalMoves({ ...options, adjacentOnly: true }),
         ...getHorizontalAndVerticalMoves({ ...options, adjacentOnly: true }),
       ];
       break;
     case "Bishop":
-      moves = getDiagonalMoves(options);
+      legalMoves = getDiagonalMoves(options);
       break;
     case "Queen":
-      moves = [
+      legalMoves = [
         ...getDiagonalMoves(options),
         ...getHorizontalAndVerticalMoves(options),
       ];
       break;
     case "Knight":
-      moves = getLMoves(options);
+      legalMoves = getLMoves(options);
       break;
     case "Rook":
-      moves = getHorizontalAndVerticalMoves(options);
+      legalMoves = getHorizontalAndVerticalMoves(options);
       break;
   }
-  // console.log("moves", moves);
 
-  if (!moves.find((m) => m.file === target.file && m.rank === target.rank)) {
+  if (
+    !legalMoves.find((m) => m.file === target.file && m.rank === target.rank)
+  ) {
     return game;
   }
 
@@ -70,23 +71,14 @@ export function makeMove(piece: Piece, target: Square, game: Game): Game {
       (p) => !(p.file === targetPiece.file && p.rank === targetPiece.rank)
     );
   }
-  console.log(
-    "old",
-    updatedPieces[
-      updatedPieces.findIndex(
-        (p) => p.file === piece.file && p.rank === piece.rank
-      )
-    ]
-  );
 
-  const updPiece = (updatedPieces[
+  updatedPieces[
     updatedPieces.findIndex(
       (p) => p.file === piece.file && p.rank === piece.rank
     )
-  ] = { ...piece, ...target });
+  ] = { ...piece, ...target };
 
-  console.log("upd p ", updPiece);
-
+  // If piece is on the same square
   if (
     updatedPieces[
       updatedPieces.findIndex(
@@ -94,20 +86,26 @@ export function makeMove(piece: Piece, target: Square, game: Game): Game {
       )
     ]
   ) {
-    console.log("hasn't moved");
-    // hasMoved = false;
-  } else {
-    console.log("has moved");
-    hasMoved = !game.isBlackTurn;
+    return game;
   }
+
+  // This is not used, but we need to create a move here
+  // Because the controller checks whether the number of moves has changed
+  // this object is not sent to the frontend nor saved in the db
+  const newMove: Move = {
+    gameId: game.id,
+    id: null,
+    piece: JSON.stringify(piece),
+    targetFile: target.file,
+    targetRank: target.rank,
+  };
 
   const updatedGame: Game = {
     ...game,
     pieces: updatedPieces,
-    isBlackTurn: hasMoved,
+    moves: [...game.moves, newMove],
   };
 
-  // console.log("updatedP", updatedPieces);
   return updatedGame;
 
   // check if check

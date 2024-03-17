@@ -6,7 +6,7 @@ import {
   getLMoves,
   getPawnMoves,
 } from "./moves";
-import { CalcMove } from "dto";
+import { CalcMove } from "../dto";
 
 describe("Moves", () => {
   describe("Vertical and horizontal", () => {

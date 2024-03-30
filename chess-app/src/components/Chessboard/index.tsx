@@ -1,16 +1,16 @@
 import { FunctionComponent, useEffect, useState } from "react";
 import "./index.css";
 import { baseURL, request } from "../../utils/axiosClient";
-import { Column, GameContext, Piece, Row, SquareContext } from "../../types";
+import { Column, Game, Piece, Row, SquareContext } from "../../types";
 import SquareComponent from "../Square";
 import { findPieceBySquare } from "../../utils/moves";
 import { letters as files, numbers as ranks } from "../../utils/squares";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 
 interface ChessBoardProps {
   reverse: boolean;
   isPractice: boolean;
-  game: GameContext;
+  game: Game;
 }
 
 const ChessBoard: FunctionComponent<ChessBoardProps> = ({ reverse, game }) => {
@@ -43,25 +43,31 @@ const ChessBoard: FunctionComponent<ChessBoardProps> = ({ reverse, game }) => {
     }
 
     if (selectedPiece) {
-      const { data } = await axios.post<GameContext>(
-        `${baseURL}/chessboard/move`,
-        {
+      axios
+        .post<Game>(`${baseURL}/chessboard/move`, {
           piece: selectedPiece,
           target: { file: squareContext.file, rank: squareContext.rank },
           gameId: game.id,
           playerWhiteId: "1",
           playerBlackId: "2",
-        }
-      );
-      console.log(data);
-      setPieces(data.pieces);
-      setBlackTurn((old) => !old);
-      setSelectedPiece(null);
+        })
+        .then(({ data }) => {
+          setPieces(data.pieces);
+          setBlackTurn((old) => !old);
+        })
+        .catch((error) => {
+          console.log(`Error making move: ${error.message}`);
+        })
+        .finally(() => {
+          console.log("finally");
+          setSelectedPiece(null);
+        });
     }
   };
 
   return (
     <>
+      {/* {error ?? null} */}
       {isBlackTurn ? "Black's turn" : "White's turn"}
       <div className="chessboard">
         {(reverse ? [...numbers].reverse() : numbers).map((number, i) => {

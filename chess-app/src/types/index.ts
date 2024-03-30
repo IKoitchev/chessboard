@@ -25,7 +25,7 @@ export type PieceType =
   | "Knight"
   | "Rook";
 
-export type GameContext = {
+export type Game = {
   id: string;
   playerWhite: Player;
   playerBlack: Player;

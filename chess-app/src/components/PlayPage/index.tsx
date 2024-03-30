@@ -4,11 +4,11 @@ import "./index.css";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import { baseURL, request } from "../../utils/axiosClient";
-import { GameContext } from "../../types";
+import { Game } from "../../types";
 
 export default function PlayPage() {
   const [isBlackPOV, setBlackPOV] = useState<boolean>(false);
-  const [game, setGame] = useState<GameContext>();
+  const [game, setGame] = useState<Game>();
   const { gameId } = useParams();
   const navigate = useNavigate();
 
@@ -17,7 +17,7 @@ export default function PlayPage() {
   };
 
   const handleStart = async () => {
-    const { data: newGame } = await axios.post<GameContext>(
+    const { data: newGame } = await axios.post<Game>(
       `${baseURL}/chessboard/play`
     );
     console.log(newGame);
@@ -29,7 +29,7 @@ export default function PlayPage() {
     console.log(gameId);
     if (gameId) {
       axios
-        .get<GameContext>(`${baseURL}/chessboard/play/${gameId}`)
+        .get<Game>(`${baseURL}/chessboard/play/${gameId}`)
         .then((res) => {
           console.log("get game", res.data);
           setGame(res.data);
@@ -39,11 +39,9 @@ export default function PlayPage() {
   }, []);
 
   useEffect(() => {
-    // console.log("gmaid", gameId);
-
     if (gameId) {
       axios
-        .get<GameContext>(`${baseURL}/chessboard/play/${gameId}`)
+        .get<Game>(`${baseURL}/chessboard/play/${gameId}`)
         .then((res) => {
           setGame(res.data);
         })

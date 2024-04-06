@@ -23,7 +23,7 @@ const routerOpts: Router.IRouterOptions = {
 };
 
 const router: Router = new Router(routerOpts);
-
+const a = "unused";
 router.get("/play/:gameId", async (ctx: RouterContext) => {
   const {
     params: { gameId },
@@ -60,7 +60,7 @@ router.post("/move", async (ctx: Context) => {
   });
 
   if (!game) {
-    console.log("game not found");
+    console.log("Game not found");
     ctx.throw(400);
   }
 
@@ -71,8 +71,9 @@ router.post("/move", async (ctx: Context) => {
   // Checks whether the piece color matches the player who has the turn
   // TO-DO: remove turn tracking from GameModel
   if ((game.moves.length % 2 === 0) !== (piece.color === "white")) {
-    console.log(`It is not ${piece.color} player's turn!`);
-    ctx.throw(400, `It is not ${piece.color} player's turn!`);
+    const errMsg = `It is not ${piece.color} player's turn!`;
+    console.log(errMsg);
+    ctx.throw(400, errMsg);
   }
 
   const afterMove: Game = makeMove(piece, target, { ...position });

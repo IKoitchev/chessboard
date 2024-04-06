@@ -6,20 +6,16 @@ import {
   getLMoves,
   getPawnMoves,
 } from "./moves";
-import { squareHasPiece } from "./moveUtils";
-
-type MoveProps = { piece: Piece; target: Square; game: Game };
+import {
+  legalMoves,
+  squareHasPiece,
+  legalMoves as getLegalMoves,
+} from "./moveUtils";
 
 export function makeMove(piece: Piece, target: Square, game: Game): Game {
   console.log("piece", piece);
   console.log("target", target);
   console.log("moves number & color piece", game.moves.length, piece.color);
-
-  // if (game.isBlackTurn !== (piece.color === "black")) {
-  //   console.log(`${piece.color}'s turn`);
-  //   return game;
-  // }
-  // console.log(`not ${piece.color}'s turn`);
 
   const options: CalcMove = {
     start: { rank: piece.rank, file: piece.file },
@@ -27,37 +23,36 @@ export function makeMove(piece: Piece, target: Square, game: Game): Game {
     color: piece.color,
   };
 
-  let legalMoves: Square[] = [];
-  let hasMoved: boolean = false;
   let updatedPieces = [...game.pieces];
   const targetPiece = squareHasPiece(target, game.pieces);
 
-  switch (piece.type) {
-    case "Pawn":
-      legalMoves = getPawnMoves(options);
-      break;
-    case "King":
-      legalMoves = [
-        ...getDiagonalMoves({ ...options, adjacentOnly: true }),
-        ...getHorizontalAndVerticalMoves({ ...options, adjacentOnly: true }),
-      ];
-      break;
-    case "Bishop":
-      legalMoves = getDiagonalMoves(options);
-      break;
-    case "Queen":
-      legalMoves = [
-        ...getDiagonalMoves(options),
-        ...getHorizontalAndVerticalMoves(options),
-      ];
-      break;
-    case "Knight":
-      legalMoves = getLMoves(options);
-      break;
-    case "Rook":
-      legalMoves = getHorizontalAndVerticalMoves(options);
-      break;
-  }
+  let legalMoves = getLegalMoves(piece, options);
+  // switch (piece.type) {
+  //   case "Pawn":
+  //     legalMoves = getPawnMoves(options);
+  //     break;
+  //   case "King":
+  //     legalMoves = [
+  //       ...getDiagonalMoves({ ...options, adjacentOnly: true }),
+  //       ...getHorizontalAndVerticalMoves({ ...options, adjacentOnly: true }),
+  //     ];
+  //     break;
+  //   case "Bishop":
+  //     legalMoves = getDiagonalMoves(options);
+  //     break;
+  //   case "Queen":
+  //     legalMoves = [
+  //       ...getDiagonalMoves(options),
+  //       ...getHorizontalAndVerticalMoves(options),
+  //     ];
+  //     break;
+  //   case "Knight":
+  //     legalMoves = getLMoves(options);
+  //     break;
+  //   case "Rook":
+  //     legalMoves = getHorizontalAndVerticalMoves(options);
+  //     break;
+  // }
 
   if (
     !legalMoves.find((m) => m.file === target.file && m.rank === target.rank)
@@ -106,8 +101,8 @@ export function makeMove(piece: Piece, target: Square, game: Game): Game {
     moves: [...game.moves, newMove],
   };
 
-  return updatedGame;
-
   // check if check
   // .....
+
+  return updatedGame;
 }

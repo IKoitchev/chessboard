@@ -16,7 +16,11 @@ import * as path from "path";
 import sequelize from "../utils/sqlite";
 import { Game as GameModel } from "../models/game";
 import { Move as MoveModel } from "../models/move";
-import { getCurrentPosition } from "../utils/moveUtils";
+import {
+  checkIfMateOrStalemate,
+  getCurrentPosition,
+  opposingColor,
+} from "../utils/moveUtils";
 
 const routerOpts: Router.IRouterOptions = {
   prefix: "/chessboard",
@@ -72,14 +76,28 @@ router.post("/move", async (ctx: Context) => {
   // TO-DO: remove turn tracking from GameModel
   if ((game.moves.length % 2 === 0) !== (piece.color === "white")) {
     const errMsg = `It is not ${piece.color} player's turn!`;
-    console.log(errMsg);
+    console.error(errMsg);
     ctx.throw(400, errMsg);
   }
 
   const afterMove: Game = makeMove(piece, target, { ...position });
 
+  const gameState = checkIfMateOrStalemate(
+    afterMove.pieces,
+    opposingColor(piece)
+  );
+
+  console.log(gameState ?? "ongoing");
+
+  if (gameState) {
+    await GameModel.update(
+      { result: gameState },
+      { where: { id: gameId }, returning: true }
+    );
+    afterMove.result = gameState;
+  }
+
   if (afterMove.moves.length != game.moves.length) {
-    console.log("making turn");
     await MoveModel.create({
       gameId,
       targetRank: target.rank,
@@ -88,6 +106,7 @@ router.post("/move", async (ctx: Context) => {
     });
   }
 
+  // console.log(afterMove.result);
   ctx.body = afterMove;
 });
 

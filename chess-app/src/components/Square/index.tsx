@@ -1,7 +1,7 @@
 import { FunctionComponent, useState } from "react";
 import classNames from "classnames";
 import "./index.css";
-import { Color, Piece, SquareContext } from "../../types";
+import { Color, SquareContext } from "../../types";
 import { letters, numbers } from "../../utils/squares";
 
 type SquareProps = SquareContext & {

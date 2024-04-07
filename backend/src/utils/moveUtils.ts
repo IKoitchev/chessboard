@@ -1,4 +1,4 @@
-import { Color, Piece, Game, Square, Move } from "@chessboard/types";
+import { Color, Piece, Game, Square, Move, GameState } from "@chessboard/types";
 import { generatePieces } from "./initBoard";
 import { Game as GameModel } from "../models/game";
 import {
@@ -23,8 +23,16 @@ export function squareHasPiece(square: Square, pieces: Piece[], color?: Color) {
   );
 }
 
-export function opposingColor(piece: Piece): Color {
-  return piece.color === "white" ? "black" : "white";
+export function opposingColor(obj: Piece | Color): Color {
+  if (typeof obj === "string") return obj === "white" ? "black" : "white";
+
+  if ("color" in obj) {
+    return obj.color === "white" ? "black" : "white";
+  }
+}
+
+export function squareOf(piece: Piece): Square {
+  return { file: piece.file, rank: piece.rank };
 }
 
 /**
@@ -35,7 +43,7 @@ export function getCurrentPosition(game: GameModel): Game {
 
   const { playerBlackId, playerWhiteId, id, moves } = game;
 
-  console.log("moveUtils.ts", moves);
+  // console.log("moveUtils.ts", moves as Move[]);
 
   if (!moves) {
     return {
@@ -65,7 +73,7 @@ export function getCurrentPosition(game: GameModel): Game {
     const pieceIndex = current.findIndex(
       (p) => p.file === piece.file && p.rank === piece.rank
     );
-    console.log("before move", current[pieceIndex]);
+    // console.log("before move", current[pieceIndex]);
 
     current[pieceIndex] = {
       ...(piece as Piece),
@@ -73,7 +81,7 @@ export function getCurrentPosition(game: GameModel): Game {
       rank: move.targetRank,
     };
 
-    console.log("after move", current[pieceIndex]);
+    // console.log("after move", current[pieceIndex]);
   }
 
   return {
@@ -110,12 +118,77 @@ export function checkIfCheck(pieces: Piece[], color: Color) {
       const moves = legalMoves(piece, options);
 
       if (moves.find((m) => m.file === king.file && m.rank === king.rank)) {
-        console.log("piece", piece);
+        // console.log("piece", piece);
         return true;
       }
     }
   }
   return false;
+}
+
+/**
+ * Check if after a move, the opposing to the moving player is in mate/stalemate
+ *
+ * @param pieces Pieces in the current board
+ * @param playerColor Color of the player that is to be mated or stalemated
+ */
+export function checkIfMateOrStalemate(
+  pieces: Piece[],
+  playerColor: Color
+): GameState {
+  const nextLegalMoves: Square[] = [];
+
+  // Get all possible moves for the player whose turn is coming
+  for (const piece of pieces) {
+    if (piece.color === playerColor) {
+      const start = squareOf(piece);
+
+      const options: CalcMove = { start, pieces, color: piece.color };
+
+      let moves = legalMoves(piece, options);
+
+      if (moves && moves.length > 0) {
+        moves = moves.filter((move) => {
+          let updatedPieces = [...pieces];
+          const targetPiece = squareHasPiece(move, pieces);
+
+          if (targetPiece) {
+            updatedPieces = updatedPieces.filter(
+              (p) =>
+                !(p.file === targetPiece.file && p.rank === targetPiece.rank)
+            );
+          }
+          updatedPieces[
+            updatedPieces.findIndex(
+              (p) => p.file === piece.file && p.rank === piece.rank
+            )
+          ] = { ...piece, ...move };
+
+          // To check if the move would be legal
+          if (checkIfCheck(updatedPieces, piece.color)) {
+            return false;
+          }
+          return true;
+        });
+      }
+      nextLegalMoves.push(...moves);
+    }
+  }
+
+  console.log(
+    "state",
+    getGameState(
+      nextLegalMoves.length > 0,
+      checkIfCheck(pieces, playerColor),
+      playerColor
+    )
+  );
+
+  return getGameState(
+    nextLegalMoves.length > 0,
+    checkIfCheck(pieces, playerColor),
+    playerColor
+  );
 }
 
 export function legalMoves(piece: Piece, options: CalcMove): Square[] {
@@ -149,4 +222,29 @@ export function legalMoves(piece: Piece, options: CalcMove): Square[] {
   }
 
   return legalMoves;
+}
+/**
+ *
+ * Calculate whether the next player to make a move is in check, mate, or stalemate
+ *
+ * @param hasMoves Whether there are legal moves left for the next player to make a move
+ * @param isCheck Wheter the next player to make a move is in check currently
+ * @param color Color of the next player to make a move
+ *
+ * @returns Result of type `GameState`, `null` if not in check and has moves
+ */
+export function getGameState(
+  hasMoves: boolean,
+  isCheck: boolean,
+  color: Color
+): GameState {
+  if (hasMoves && isCheck) {
+    return `${color} in check`;
+  } else if (hasMoves && !isCheck) {
+    return null;
+  } else if (!hasMoves && isCheck) {
+    return `${opposingColor(color)} win`;
+  } else {
+    return "stalemate";
+  }
 }

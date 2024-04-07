@@ -36,6 +36,6 @@ app.use(movieController.routes());
 app.use(movieController.allowedMethods());
 
 // Application error logging.
-app.on("error", console.error);
+// app.on("error", console.error);
 
 export default app;

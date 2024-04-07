@@ -30,6 +30,7 @@ declare module "@chessboard/types" {
     playerBlackId: string;
     pieces: Piece[];
     moves: Move[];
+    result?: GameState;
   };
   type Player = {
     id: string;
@@ -41,4 +42,10 @@ declare module "@chessboard/types" {
     piece: string;
     gameId: string;
   };
+  type GameState =
+    | "draw"
+    | "stalemate"
+    | `${Color} in check`
+    | `${Color} win`
+    | null;
 }

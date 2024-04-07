@@ -1,22 +1,13 @@
 import { Game, Move, Piece, Square } from "@chessboard/types";
-import { CalcMove, MakeMoveContext } from "src/dto";
+import { CalcMove } from "src/dto";
+
 import {
-  getDiagonalMoves,
-  getHorizontalAndVerticalMoves,
-  getLMoves,
-  getPawnMoves,
-} from "./moves";
-import {
-  legalMoves,
   squareHasPiece,
   legalMoves as getLegalMoves,
+  checkIfCheck,
 } from "./moveUtils";
 
 export function makeMove(piece: Piece, target: Square, game: Game): Game {
-  console.log("piece", piece);
-  console.log("target", target);
-  console.log("moves number & color piece", game.moves.length, piece.color);
-
   const options: CalcMove = {
     start: { rank: piece.rank, file: piece.file },
     pieces: game.pieces,
@@ -27,32 +18,6 @@ export function makeMove(piece: Piece, target: Square, game: Game): Game {
   const targetPiece = squareHasPiece(target, game.pieces);
 
   let legalMoves = getLegalMoves(piece, options);
-  // switch (piece.type) {
-  //   case "Pawn":
-  //     legalMoves = getPawnMoves(options);
-  //     break;
-  //   case "King":
-  //     legalMoves = [
-  //       ...getDiagonalMoves({ ...options, adjacentOnly: true }),
-  //       ...getHorizontalAndVerticalMoves({ ...options, adjacentOnly: true }),
-  //     ];
-  //     break;
-  //   case "Bishop":
-  //     legalMoves = getDiagonalMoves(options);
-  //     break;
-  //   case "Queen":
-  //     legalMoves = [
-  //       ...getDiagonalMoves(options),
-  //       ...getHorizontalAndVerticalMoves(options),
-  //     ];
-  //     break;
-  //   case "Knight":
-  //     legalMoves = getLMoves(options);
-  //     break;
-  //   case "Rook":
-  //     legalMoves = getHorizontalAndVerticalMoves(options);
-  //     break;
-  // }
 
   if (
     !legalMoves.find((m) => m.file === target.file && m.rank === target.rank)
@@ -84,6 +49,11 @@ export function makeMove(piece: Piece, target: Square, game: Game): Game {
     return game;
   }
 
+  // If moving player is in check, move is not legal
+  if (checkIfCheck(updatedPieces, piece.color)) {
+    return game;
+  }
+
   // This is not used, but we need to create a move here
   // Because the controller checks whether the number of moves has changed
   // this object is not sent to the frontend nor saved in the db
@@ -100,9 +70,6 @@ export function makeMove(piece: Piece, target: Square, game: Game): Game {
     pieces: updatedPieces,
     moves: [...game.moves, newMove],
   };
-
-  // check if check
-  // .....
 
   return updatedGame;
 }

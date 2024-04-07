@@ -1,7 +1,14 @@
 import { FunctionComponent, useEffect, useState } from "react";
 import "./index.css";
 import { baseURL, request } from "../../utils/axiosClient";
-import { Column, Game, Piece, Row, SquareContext } from "../../types";
+import {
+  Column,
+  Game,
+  GameState,
+  Piece,
+  Row,
+  SquareContext,
+} from "../../types";
 import SquareComponent from "../Square";
 import { findPieceBySquare } from "../../utils/moves";
 import { letters as files, numbers as ranks } from "../../utils/squares";
@@ -21,6 +28,7 @@ const ChessBoard: FunctionComponent<ChessBoardProps> = ({ reverse, game }) => {
   const [selectedPiece, setSelectedPiece] = useState<Piece | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isBlackTurn, setBlackTurn] = useState<boolean>(false);
+  const [result, setResult] = useState<GameState>(null);
 
   useEffect(() => {
     // console.log(game);
@@ -34,6 +42,8 @@ const ChessBoard: FunctionComponent<ChessBoardProps> = ({ reverse, game }) => {
   useEffect(() => {
     console.log("pcs", pieces);
   }, [pieces]);
+
+  function updateTurn() {}
 
   // TO-DO reduce complexity, this is repeated 64 times on each render
   const handleClick = async (squareContext: SquareContext) => {
@@ -52,8 +62,10 @@ const ChessBoard: FunctionComponent<ChessBoardProps> = ({ reverse, game }) => {
           playerBlackId: "2",
         })
         .then(({ data }) => {
+          console.log(data);
           setPieces(data.pieces);
-          setBlackTurn((old) => !old);
+          setBlackTurn(data.moves.length % 2 === 1);
+          setResult(data.result ?? null);
         })
         .catch((error) => {
           console.log(`Error making move: ${error.message}`);
@@ -67,7 +79,8 @@ const ChessBoard: FunctionComponent<ChessBoardProps> = ({ reverse, game }) => {
 
   return (
     <>
-      {/* {error ?? null} */}
+      {error ?? null}
+      {result}
       {isBlackTurn ? "Black's turn" : "White's turn"}
       <div className="chessboard">
         {(reverse ? [...numbers].reverse() : numbers).map((number, i) => {

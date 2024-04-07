@@ -29,9 +29,17 @@ export type Game = {
   id: string;
   playerWhite: Player;
   playerBlack: Player;
-  isBlackTurn: boolean;
   pieces: Piece[];
+  moves: Move[];
+  result?: GameState;
 };
+
+export type GameState =
+  | "draw"
+  | "stalemate"
+  | `${Color} in check`
+  | `${Color} win`
+  | null;
 
 export type SquareContext = Square & {
   piece?: Piece;
@@ -41,4 +49,12 @@ export type Player = {
   id: string;
   // name: string;
   // ...
+};
+
+export type Move = {
+  id: string;
+  targetFile: Column;
+  targetRank: Row;
+  piece: string;
+  gameId: string;
 };

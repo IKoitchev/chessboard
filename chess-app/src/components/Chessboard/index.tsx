@@ -1,6 +1,6 @@
 import { FunctionComponent, useEffect, useState } from "react";
 import "./index.css";
-import { baseURL, request } from "../../utils/axiosClient";
+import { baseURL } from "../../utils/axiosClient";
 import {
   Column,
   Game,
@@ -14,7 +14,8 @@ import SquareComponent from "../Square";
 import { findPieceBySquare } from "../../utils/moves";
 import { letters as files, numbers as ranks } from "../../utils/squares";
 import axios, { AxiosError } from "axios";
-import { DndContext, DragMoveEvent } from "@dnd-kit/core";
+import { DndContext, DragMoveEvent, DragOverlay } from "@dnd-kit/core";
+import PieceIcon from "../Piece";
 
 interface ChessBoardProps {
   reverse: boolean;
@@ -42,6 +43,7 @@ const ChessBoard: FunctionComponent<ChessBoardProps> = ({ reverse, game }) => {
   useEffect(() => {
     console.log("pcs", pieces);
   }, [pieces]);
+
   useEffect(() => {
     console.log(
       selectedPiece
@@ -50,6 +52,7 @@ const ChessBoard: FunctionComponent<ChessBoardProps> = ({ reverse, game }) => {
       "selected"
     );
   }, [selectedPiece]);
+
   // TO-DO reduce complexity, this is repeated 64 times on each render
   const handleClick = async (squareContext: SquareContext) => {
     if (squareContext.piece) {
@@ -65,13 +68,29 @@ const ChessBoard: FunctionComponent<ChessBoardProps> = ({ reverse, game }) => {
     const movingPiece = event.active.data.current as Piece;
     const target = event.over?.data.current as Square;
 
+    if (!target) {
+      return;
+    }
+
     if (movingPiece.file === target.file && movingPiece.rank === target.rank) {
       setSelectedPiece(movingPiece);
       return;
     }
 
     console.log("dragging", movingPiece, target);
+
+    const index = pieces.findIndex(
+      (p) => p.file === movingPiece.file && p.rank === movingPiece.rank
+    );
+
+    // Update the UI before the request to avoid glitching of pieces
+    const piecesCopy = [...pieces];
+    piecesCopy[index] = { ...movingPiece, ...target };
+    console.log(piecesCopy);
+    setPieces(piecesCopy);
+
     move(movingPiece, target);
+    setSelectedPiece(null);
   };
 
   function move(piece: Piece, target: Square) {
@@ -96,6 +115,9 @@ const ChessBoard: FunctionComponent<ChessBoardProps> = ({ reverse, game }) => {
       })
       .catch((error) => {
         console.log(`Error making move: ${error as AxiosError}`);
+        // Revert pieces to the last state received from the server
+        // Because they are set preemtively before the request
+        setPieces(game.pieces);
       })
       .finally(() => {
         console.log("finally");
@@ -126,6 +148,11 @@ const ChessBoard: FunctionComponent<ChessBoardProps> = ({ reverse, game }) => {
                     />
                   );
                 })}
+
+                {/* causes piece opacity to become 0 if placed in the same square */}
+                {/* <DragOverlay zIndex={2}>
+                  {selectedPiece ? <PieceIcon piece={selectedPiece} /> : null}
+                </DragOverlay> */}
               </>
             );
           })}

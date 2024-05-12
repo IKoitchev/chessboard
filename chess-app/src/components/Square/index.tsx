@@ -1,4 +1,4 @@
-import { FunctionComponent, useState } from "react";
+import { FunctionComponent, useEffect, useState } from "react";
 import classNames from "classnames";
 import "./index.css";
 import { Color, SquareContext } from "../../types";

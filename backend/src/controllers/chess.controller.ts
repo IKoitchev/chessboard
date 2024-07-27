@@ -1,19 +1,9 @@
-import { Board, Game, Move, Piece } from "@chessboard/types";
+import { Game } from "@chessboard/types";
 import { Context } from "koa";
 import Router, { RouterContext } from "koa-router";
-import { generatePieces, initBoard } from "../utils/initBoard";
+import { generatePieces } from "../utils/initBoard";
 import { MakeMoveContext } from "src/dto";
-import { Squares } from "../utils/squares";
-import {
-  getDiagonalMoves,
-  getHorizontalAndVerticalMoves,
-  getLMoves,
-  getPawnMoves,
-} from "../utils/moves";
 import { makeMove } from "../utils/makeMove";
-import { Guid } from "js-guid";
-import * as path from "path";
-import sequelize from "../utils/sqlite";
 import { Game as GameModel } from "../models/game";
 import { Move as MoveModel } from "../models/move";
 import {
@@ -27,7 +17,7 @@ const routerOpts: Router.IRouterOptions = {
 };
 
 const router: Router = new Router(routerOpts);
-const a = "unused";
+
 router.get("/play/:gameId", async (ctx: RouterContext) => {
   const {
     params: { gameId },

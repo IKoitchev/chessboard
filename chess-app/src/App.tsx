@@ -1,10 +1,10 @@
-import React from "react";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
-import Navbar from "./components/Navbar";
-import "./App.css";
-import PlayPage from "./components/PlayPage";
+import React from 'react'
+import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import Navbar from './components/Navbar'
+import './App.css'
+import PlayPage from './components/PlayPage'
 
-function App() {
+function App () {
   return (
     <>
       <Navbar />
@@ -14,7 +14,7 @@ function App() {
         </Routes>
       </BrowserRouter>
     </>
-  );
+  )
 }
 
-export default App;
+export default App

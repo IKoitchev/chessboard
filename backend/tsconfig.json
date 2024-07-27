@@ -5,6 +5,7 @@
     "lib": ["ESNext"],
     "outDir": "dist",
     "rootDir": "src",
+    "skipLibCheck": true,
     "noImplicitAny": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,

@@ -4,9 +4,7 @@ import movieController from "./controllers/chess.controller";
 import cors from "@koa/cors";
 import bodyParser from "koa-bodyparser";
 import logger from "koa-logger";
-import * as path from "path";
 import sequelize from "./utils/sqlite";
-import { Game } from "./models/game";
 
 const app: Koa = new Koa();
 

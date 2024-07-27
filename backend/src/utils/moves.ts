@@ -1,4 +1,4 @@
-import { Color, Piece, Square } from "@chessboard/types";
+import { Square } from "@chessboard/types";
 import { letters, numbers } from "./squares";
 import { CalcMove } from "src/dto";
 import { squareHasPiece } from "./moveUtils";
@@ -11,7 +11,7 @@ export function getHorizontalAndVerticalMoves(ctx: CalcMove) {
     adjacentOnly,
   } = ctx;
 
-  let moves: Square[] = [];
+  const moves: Square[] = [];
 
   const maxDistanceUp = 7 - numbers.indexOf(rank);
   const maxDistanceDown = numbers.indexOf(rank);
@@ -133,7 +133,7 @@ export function getDiagonalMoves(ctx: CalcMove) {
     adjacentOnly,
   } = ctx;
 
-  let moves: Square[] = [];
+  const moves: Square[] = [];
 
   const maxDistanceUp = 7 - numbers.indexOf(rank);
   const maxDistanceDown = numbers.indexOf(rank);
@@ -252,7 +252,7 @@ export function getLMoves(ctx: CalcMove) {
     pieces,
   } = ctx;
 
-  let moves: Square[] = [];
+  const moves: Square[] = [];
 
   const coordinates = [
     [2, 1],

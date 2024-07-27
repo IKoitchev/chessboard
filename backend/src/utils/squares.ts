@@ -6,7 +6,7 @@ export const letters: File[] = ["a", "b", "c", "d", "e", "f", "g", "h"];
 export const Squares = squares();
 
 function squares() {
-  let squares: Square[][] = [];
+  const squares: Square[][] = [];
 
   for (const file of letters) {
     squares[letters.indexOf(file)] = [];

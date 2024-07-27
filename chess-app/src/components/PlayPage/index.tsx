@@ -1,10 +1,10 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import ChessBoard from "../Chessboard";
 import "./index.css";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
-import { baseURL, request } from "../../utils/axiosClient";
-import { Game } from "../../types";
+import { baseURL } from "../../utils/axiosClient";
+import { type Game } from "../../types";
 
 export default function PlayPage() {
   const [isBlackPOV, setBlackPOV] = useState<boolean>(false);
@@ -34,7 +34,9 @@ export default function PlayPage() {
           console.log("get game", res.data);
           setGame(res.data);
         })
-        .catch((err) => console.log(err));
+        .catch((err) => {
+          console.log(err);
+        });
     }
   }, []);
 
@@ -45,7 +47,9 @@ export default function PlayPage() {
         .then((res) => {
           setGame(res.data);
         })
-        .catch((err) => console.log(err));
+        .catch((err) => {
+          console.log(err);
+        });
     }
   }, [gameId]);
   return (

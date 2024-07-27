@@ -1,7 +1,7 @@
-import { FunctionComponent, useEffect, useState } from "react";
+import { type FunctionComponent, useState } from "react";
 import classNames from "classnames";
 import "./index.css";
-import { Color, SquareContext } from "../../types";
+import { type Color, type SquareContext } from "../../types";
 import { letters, numbers } from "../../utils/squares";
 import PieceIcon from "../Piece";
 import { useDroppable } from "@dnd-kit/core";
@@ -16,9 +16,9 @@ const Square: FunctionComponent<SquareProps> = ({
   piece,
   onClick,
 }) => {
-  const [focused, setFocused] = useState<Boolean>(false);
+  const [focused, setFocused] = useState<boolean>(false);
 
-  const { isOver, setNodeRef } = useDroppable({
+  const { setNodeRef } = useDroppable({
     id: file + rank,
     data: { piece, rank, file },
   });
@@ -35,7 +35,9 @@ const Square: FunctionComponent<SquareProps> = ({
   return (
     <div
       className={classNames(color, "square", focused ? "focused" : "")}
-      onClick={() => handleClick({ rank, file, piece })}
+      onClick={() => {
+        handleClick({ rank, file, piece });
+      }}
       ref={setNodeRef}
     >
       <PieceIcon piece={piece} />

@@ -10,7 +10,7 @@ import {
   Table,
 } from "sequelize-typescript";
 import { Game } from "./game";
-import { Color, Rank, Square, File } from "@chessboard/types";
+import { Rank, File } from "@chessboard/types";
 
 @Table({ tableName: "Move", createdAt: false, updatedAt: false })
 export class Move extends Model {

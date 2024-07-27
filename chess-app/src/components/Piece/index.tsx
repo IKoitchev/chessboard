@@ -1,5 +1,5 @@
-import { FunctionComponent } from "react";
-import { Piece } from "../../types";
+import { type FunctionComponent } from "react";
+import { type Piece } from "../../types";
 import { useDraggable } from "@dnd-kit/core";
 
 import "./index.css";
@@ -8,11 +8,10 @@ interface PieceIconProps {
   piece: Piece | undefined;
 }
 const PieceIcon: FunctionComponent<PieceIconProps> = ({ piece }) => {
-  const { attributes, listeners, setNodeRef, transform, isDragging } =
-    useDraggable({
-      id: piece ? piece.file + piece.rank : "no-id",
-      data: piece,
-    });
+  const { attributes, listeners, setNodeRef, transform } = useDraggable({
+    id: piece ? piece.file + piece.rank : "no-id",
+    data: piece,
+  });
 
   if (!piece) {
     return null;

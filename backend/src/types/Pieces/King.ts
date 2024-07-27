@@ -1,5 +1,4 @@
 import { Color, Piece, PieceType, Rank, Square, File } from "@chessboard/types";
-import { Squares, numbers } from "../../utils/squares";
 
 export class King implements Piece {
   color: Color;

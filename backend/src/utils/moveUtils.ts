@@ -1,4 +1,4 @@
-import { Color, Piece, Game, Square, Move, GameState } from "@chessboard/types";
+import { Color, Piece, Game, Square, GameState } from "@chessboard/types";
 import { generatePieces } from "./initBoard";
 import { Game as GameModel } from "../models/game";
 import {

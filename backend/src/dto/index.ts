@@ -1,4 +1,4 @@
-import { Color, Game, Piece, Square } from "@chessboard/types";
+import { Color, Piece, Square } from "@chessboard/types";
 
 export type MakeMoveContext = {
   piece: Piece;

@@ -1,4 +1,4 @@
-import { Color, Column, Row, Square } from "../types";
+import { type Column, type Row, type Square } from "../types";
 
 export const numbers: Row[] = ["1", "2", "3", "4", "5", "6", "7", "8"];
 export const letters: Column[] = ["a", "b", "c", "d", "e", "f", "g", "h"];
@@ -6,7 +6,7 @@ export const letters: Column[] = ["a", "b", "c", "d", "e", "f", "g", "h"];
 export const Squares = squares();
 
 function squares() {
-  let squares: Square[][] = [];
+  const squares: Square[][] = [];
 
   for (const file of letters) {
     squares[letters.indexOf(file)] = [];

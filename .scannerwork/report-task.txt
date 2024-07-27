@@ -1,0 +1,6 @@
+projectKey=chessboard
+serverUrl=http://localhost:9000
+serverVersion=10.4.1.88267
+dashboardUrl=http://localhost:9000/dashboard?id=chessboard
+ceTaskId=226f4cd7-7491-4cce-955c-11e52ba26560
+ceTaskUrl=http://localhost:9000/api/ce/task?id=226f4cd7-7491-4cce-955c-11e52ba26560

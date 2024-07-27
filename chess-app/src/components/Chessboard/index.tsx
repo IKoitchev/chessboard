@@ -1,21 +1,18 @@
-import { FunctionComponent, useEffect, useState } from "react";
+import { type FunctionComponent, useEffect, useState } from "react";
 import "./index.css";
 import { baseURL } from "../../utils/axiosClient";
 import {
-  Column,
-  Game,
-  GameState,
-  Piece,
-  Row,
-  Square,
-  SquareContext,
+  type Game,
+  type GameState,
+  type Piece,
+  type Square,
+  type SquareContext,
 } from "../../types";
 import SquareComponent from "../Square";
 import { findPieceBySquare } from "../../utils/moves";
 import { letters as files, numbers as ranks } from "../../utils/squares";
-import axios, { AxiosError } from "axios";
-import { DndContext, DragMoveEvent, DragOverlay } from "@dnd-kit/core";
-import PieceIcon from "../Piece";
+import axios, { type AxiosError } from "axios";
+import { DndContext, type DragMoveEvent } from "@dnd-kit/core";
 
 interface ChessBoardProps {
   reverse: boolean;
@@ -24,12 +21,12 @@ interface ChessBoardProps {
 }
 
 const ChessBoard: FunctionComponent<ChessBoardProps> = ({ reverse, game }) => {
-  let letters = [...files];
-  let numbers = [...ranks].reverse();
+  const letters = [...files];
+  const numbers = [...ranks].reverse();
 
   const [pieces, setPieces] = useState<Piece[]>([]);
   const [selectedPiece, setSelectedPiece] = useState<Piece | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [error] = useState<string | null>(null);
   const [isBlackTurn, setBlackTurn] = useState<boolean>(false);
   const [result, setResult] = useState<GameState>(null);
 
@@ -117,7 +114,7 @@ const ChessBoard: FunctionComponent<ChessBoardProps> = ({ reverse, game }) => {
         console.log(`Error making move: ${error as AxiosError}`);
         // Revert pieces to the last state received from the server
         // Because they are set preemtively before the request
-        setPieces(game.pieces);
+        setPieces([...pieces]);
       })
       .finally(() => {
         console.log("finally");
@@ -129,7 +126,11 @@ const ChessBoard: FunctionComponent<ChessBoardProps> = ({ reverse, game }) => {
       {error ?? null}
       {result}
       {isBlackTurn ? "Black's turn" : "White's turn"}
-      <DndContext onDragEnd={(event) => dragMove(event)}>
+      <DndContext
+        onDragEnd={async (event) => {
+          await dragMove(event);
+        }}
+      >
         <div className="chessboard">
           {(reverse ? [...numbers].reverse() : numbers).map((number, i) => {
             return (
@@ -141,8 +142,8 @@ const ChessBoard: FunctionComponent<ChessBoardProps> = ({ reverse, game }) => {
                   return (
                     <SquareComponent
                       key={letter + number}
-                      file={letter as Column}
-                      rank={number as Row}
+                      file={letter}
+                      rank={number}
                       piece={findPieceBySquare(pieces, letter, number)}
                       onClick={handleClick}
                     />

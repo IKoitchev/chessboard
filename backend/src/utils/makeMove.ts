@@ -17,7 +17,7 @@ export function makeMove(piece: Piece, target: Square, game: Game): Game {
   let updatedPieces = [...game.pieces];
   const targetPiece = squareHasPiece(target, game.pieces);
 
-  let legalMoves = getLegalMoves(piece, options);
+  const legalMoves = getLegalMoves(piece, options);
 
   if (
     !legalMoves.find((m) => m.file === target.file && m.rank === target.rank)

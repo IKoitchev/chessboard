@@ -19,7 +19,7 @@ export function initBoard(): Board {
 }
 
 export function generatePieces(): Piece[] {
-  let pieces: Piece[] = [];
+  const pieces: Piece[] = [];
 
   // Pawns
   for (const file of letters) {

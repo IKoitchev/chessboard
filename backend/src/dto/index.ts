@@ -17,3 +17,8 @@ export type MoveResult = {
   isBlackTurn: boolean;
   pieces: Piece[];
 };
+export type UserDto = {
+  username: string;
+  primaryEmail: string;
+  password: string;
+};

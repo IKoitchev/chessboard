@@ -12,13 +12,7 @@ import {
   opposingColor,
 } from "../utils/moveUtils";
 
-const routerOpts: Router.IRouterOptions = {
-  prefix: "/chessboard",
-};
-
-const router: Router = new Router(routerOpts);
-
-router.get("/play/:gameId", async (ctx: RouterContext) => {
+export async function getGameHandler(ctx: RouterContext) {
   const {
     params: { gameId },
   } = ctx;
@@ -31,9 +25,11 @@ router.get("/play/:gameId", async (ctx: RouterContext) => {
   const position: Game = getCurrentPosition(game);
 
   ctx.body = { ...position };
-});
+}
 
-router.post("/play", async (ctx: RouterContext) => {
+// router.get("/play/:gameId", getGameHandler);
+
+export async function startGameHandler(ctx: RouterContext) {
   // Add metadata such as player names, passed from the context
   const newGame = await GameModel.create({
     playerBlackId: "black",
@@ -43,9 +39,9 @@ router.post("/play", async (ctx: RouterContext) => {
   const initialPieces = generatePieces();
 
   ctx.body = { ...newGame.dataValues, pieces: initialPieces };
-});
+}
 
-router.post("/move", async (ctx: Context) => {
+export async function makeMoveHandler(ctx: Context) {
   const { piece, target, gameId } = ctx.request.body as MakeMoveContext;
 
   // Find the game
@@ -98,19 +94,4 @@ router.post("/move", async (ctx: Context) => {
 
   // console.log(afterMove.result);
   ctx.body = afterMove;
-});
-
-router.get("/test", async (ctx: Context) => {
-  const id = "a184004c-4710-4cde-a029-28bbcf597848";
-
-  const game = await GameModel.findByPk(id, { include: [MoveModel] });
-  const { pieces } = getCurrentPosition(game);
-
-  ctx.body = {};
-});
-
-router.patch("/:movie_id", async (ctx: Context) => {
-  ctx.body = "PATCH";
-});
-
-export default router;
+}

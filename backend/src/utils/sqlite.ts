@@ -1,7 +1,6 @@
 import { Sequelize } from "sequelize-typescript";
 import * as path from "path";
-import { Game } from "../models/game";
-import { Move } from "../models/move";
+import { Game, Move, User } from "../models/index";
 
 const sequelize = new Sequelize({
   dialect: "sqlite",
@@ -13,7 +12,7 @@ const sequelize = new Sequelize({
     "chessdb.sqlite"
   )}`,
   logging: false,
-  models: [Game, Move],
+  models: [Game, Move, User],
 });
 
 export default sequelize;

@@ -49,3 +49,36 @@ declare module "@chessboard/types" {
     | `${Color} win`
     | null;
 }
+
+export type JWTOptions = {
+  aud?: string;
+  expires?: number;
+  refreshToken?: boolean;
+  scope?: string;
+};
+
+export interface TokenResponse {
+  /**
+   * The bearer access token to use for authenticating requests.
+   */
+  access_token: string;
+
+  /**
+   * How long until the access token expires in seconds from now.
+   */
+  expires_in?: number;
+
+  /**
+   * The OpenID ID token as a JWT.
+   *
+   * This field is only present on OpenID connect providers.
+   */
+  id_token?: string;
+
+  /**
+   * A refresh token for getting a new access token.
+   */
+  refresh_token?: string;
+
+  token_type: "bearer";
+}

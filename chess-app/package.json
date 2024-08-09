@@ -8,23 +8,30 @@
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
     "@types/jest": "^27.5.2",
-    "@types/node": "^16.18.77",
-    "@types/react": "^18.2.48",
-    "@types/react-dom": "^18.2.18",
-    "axios": "^1.6.7",
+    "@types/node": "^16.18.104",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "axios": "^1.7.3",
     "classnames": "^2.5.1",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-router-dom": "^6.22.0",
+    "jose": "^5.6.3",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.26.0",
     "react-scripts": "5.0.1",
+    "typescript": "^4.9.5",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
     "start": "set PORT=3333 && react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "lint": "eslint"
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
   },
   "browserslist": {
     "production": [
@@ -39,13 +46,6 @@
     ]
   },
   "devDependencies": {
-    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
-    "@eslint/js": "^9.7.0",
-    "@types/axios": "^0.14.0",
-    "eslint": "^9.7.0",
-    "eslint-plugin-react": "^7.35.0",
-    "globals": "^15.8.0",
-    "typescript": "^5.5.4",
-    "typescript-eslint": "^7.17.0"
+    "tailwindcss": "^3.4.7"
   }
 }

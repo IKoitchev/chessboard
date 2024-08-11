@@ -6,6 +6,8 @@ import { letters, numbers } from "../../utils/squares";
 import PieceIcon from "../Piece";
 import { useDroppable } from "@dnd-kit/core";
 
+type SquareStyle = "default" | "selected" | "moved";
+
 type SquareProps = SquareContext & {
   onClick: (squareContext: SquareContext) => void;
 };
@@ -16,7 +18,8 @@ const Square: FunctionComponent<SquareProps> = ({
   piece,
   onClick,
 }) => {
-  const [focused, setFocused] = useState<boolean>(false);
+  // const [focused, setFocused] = useState<boolean>(false);
+  const [style, setStyle] = useState<SquareStyle>("default");
 
   const { setNodeRef } = useDroppable({
     id: file + rank,
@@ -25,7 +28,8 @@ const Square: FunctionComponent<SquareProps> = ({
   const handleClick = (squareContext: SquareContext) => {
     onClick(squareContext);
     if (squareContext.piece) {
-      setFocused((old) => !old);
+      // setFocused((old) => !old);
+      setStyle("selected");
     }
   };
   const color: Color =
@@ -34,7 +38,7 @@ const Square: FunctionComponent<SquareProps> = ({
       : "black";
   return (
     <div
-      className={classNames(color, "square", focused ? "focused" : "")}
+      className={classNames(color, "square", style)}
       onClick={() => {
         handleClick({ rank, file, piece });
       }}

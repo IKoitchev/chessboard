@@ -41,7 +41,7 @@ export async function startGameHandler(ctx: RouterContext) {
   ctx.body = { ...newGame.dataValues, pieces: initialPieces };
 }
 
-export async function makeMoveHandler(ctx: Context) {
+export async function makeMoveHandler(ctx: RouterContext) {
   const { piece, target, gameId } = ctx.request.body as MakeMoveContext;
 
   // Find the game

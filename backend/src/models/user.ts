@@ -1,12 +1,16 @@
 import {
+  AllowNull,
+  BelongsTo,
   Column,
   DataType,
   Default,
+  ForeignKey,
   IsUUID,
   Model,
   PrimaryKey,
   Table,
 } from "sequelize-typescript";
+import { Game } from "./game";
 
 @Table({ tableName: "User", createdAt: true, updatedAt: true })
 export class User extends Model {
@@ -24,4 +28,13 @@ export class User extends Model {
 
   @Column(DataType.STRING)
   declare password: string;
+
+  @ForeignKey(() => Game)
+  @AllowNull(true)
+  @Column(DataType.UUID)
+  declare currentGameId: string;
+
+  // Association with the Game model
+  @BelongsTo(() => Game, { as: "currentGame" })
+  declare currentGame: Game;
 }

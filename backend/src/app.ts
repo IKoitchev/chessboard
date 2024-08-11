@@ -6,8 +6,11 @@ import logger from "koa-logger";
 import sequelize from "./utils/sqlite";
 import authRoutes from "./routes/auth.routes";
 import chessRoutes from "./routes/chess.routes";
+import websockify from "koa-websocket";
+import moveRoutes from "./routes/move.routes";
+// const app: Koa = new Koa();
 
-const app: Koa = new Koa();
+const app = websockify(new Koa());
 
 // Generic error handling middleware.
 app.use(async (ctx: Koa.Context, next: () => Promise<any>) => {
@@ -24,9 +27,8 @@ app.use(async (ctx: Koa.Context, next: () => Promise<any>) => {
   }
 });
 
-sequelize.sync();
-
-// sequelize.sync({ alter: true });
+// sequelize.sync();
+sequelize.sync({ alter: true });
 
 app.use(cors());
 app.use(logger());
@@ -36,6 +38,8 @@ app.use(chessRoutes.allowedMethods());
 
 app.use(authRoutes.routes());
 app.use(authRoutes.allowedMethods());
+
+app.ws.use(moveRoutes);
 
 // Application error logging.
 // app.on("error", console.error);

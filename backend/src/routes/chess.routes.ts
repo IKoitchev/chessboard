@@ -7,6 +7,7 @@ import {
 import { Game as GameModel, Move as MoveModel } from "../models";
 import { getCurrentPosition } from "../utils/moveUtils";
 import { Context } from "koa";
+import { authorize } from "../middleware/auth.middleware";
 
 const routerOpts: IRouterOptions = {
   prefix: "/chessboard",
@@ -20,13 +21,8 @@ router.get("/play/:gameId", getGameHandler);
 
 router.post("/move", makeMoveHandler);
 
-router.get("/test", async (ctx: Context) => {
-  const id = "a184004c-4710-4cde-a029-28bbcf597848";
-
-  const game = await GameModel.findByPk(id, { include: [MoveModel] });
-  const { pieces } = getCurrentPosition(game);
-
-  ctx.body = {};
+router.get("/protected", authorize, async (ctx: Context) => {
+  ctx.body = " Ur authed";
 });
 
 export default router;

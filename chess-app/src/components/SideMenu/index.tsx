@@ -1,10 +1,12 @@
-import { FunctionComponent } from "react";
+import { FunctionComponent, ReactElement, ReactNode } from "react";
 import SideMenuItem from "../SideMenuItem";
 import { useUser } from "../UserProvider";
 
-interface SideMenuProps {}
+interface SideMenuProps {
+  children: ReactElement;
+}
 
-const SideMenu: FunctionComponent<SideMenuProps> = () => {
+const SideMenu: FunctionComponent<SideMenuProps> = ({ children }) => {
   const { isLoggedIn } = useUser();
   const currentUrl = document.location.pathname;
   console.log("search", currentUrl);
@@ -88,6 +90,7 @@ const SideMenu: FunctionComponent<SideMenuProps> = () => {
           </ul>
         </div>
       </aside>
+      <div className="p-4 sm:ml-64">{children}</div>
     </>
   );
 };

@@ -37,6 +37,7 @@ interface UserContext extends LoginState {
   login: ({ primaryEmail, password }: PasswordLoginParams) => any;
   userInfo: UserInfo | null;
   setUserInfo: Dispatch<UserInfo>;
+  getAccessToken: () => string;
 }
 const REFRESH_TOKEN = "refresh_token";
 const ACCESS_TOKEN = "access_token";
@@ -47,6 +48,13 @@ export function UserProvider({ children }: UserProviderProps) {
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const [state, setState] = useState(initialState);
   const navigate = useNavigate();
+
+  const getAccessToken = useCallback(() => {
+    const token = String(localStorage.getItem(ACCESS_TOKEN));
+    console.log(token);
+
+    return token;
+  }, []);
 
   const logout = useCallback((redirectTo?: string) => {
     localStorage.removeItem(REFRESH_TOKEN);
@@ -94,9 +102,10 @@ export function UserProvider({ children }: UserProviderProps) {
       login,
       setUserInfo,
       userInfo,
+      getAccessToken,
       ...state,
     }),
-    [logout, login, userInfo, state]
+    [logout, login, getAccessToken, userInfo, state]
   );
 
   return <Context.Provider value={value}>{children}</Context.Provider>;

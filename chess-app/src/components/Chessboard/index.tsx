@@ -18,16 +18,21 @@ interface ChessBoardProps {
   reverse: boolean;
   isPractice: boolean;
   game: Game;
+  changeTurn: (isBlackTurn: boolean) => void;
 }
 
-const ChessBoard: FunctionComponent<ChessBoardProps> = ({ reverse, game }) => {
+const ChessBoard: FunctionComponent<ChessBoardProps> = ({
+  reverse,
+  game,
+  changeTurn,
+  isPractice,
+}) => {
   const letters = [...files];
   const numbers = [...ranks].reverse();
 
   const [pieces, setPieces] = useState<Piece[]>([]);
   const [selectedPiece, setSelectedPiece] = useState<Piece | null>(null);
   const [error] = useState<string | null>(null);
-  const [isBlackTurn, setBlackTurn] = useState<boolean>(false);
   const [result, setResult] = useState<GameState>(null);
 
   useEffect(() => {
@@ -50,7 +55,6 @@ const ChessBoard: FunctionComponent<ChessBoardProps> = ({ reverse, game }) => {
     );
   }, [selectedPiece]);
 
-  // TO-DO reduce complexity, this is repeated 64 times on each render
   const handleClick = async (squareContext: SquareContext) => {
     if (squareContext.piece) {
       setSelectedPiece(squareContext.piece);
@@ -107,7 +111,7 @@ const ChessBoard: FunctionComponent<ChessBoardProps> = ({ reverse, game }) => {
       .then(({ data }) => {
         console.log(data);
         setPieces(data.pieces);
-        setBlackTurn(data.moves.length % 2 === 1);
+        changeTurn(data.moves.length % 2 === 1);
         setResult(data.result ?? null);
       })
       .catch((error) => {
@@ -125,7 +129,7 @@ const ChessBoard: FunctionComponent<ChessBoardProps> = ({ reverse, game }) => {
     <>
       {error ?? null}
       {result}
-      {isBlackTurn ? "Black's turn" : "White's turn"}
+
       <DndContext
         onDragEnd={async (event) => {
           await dragMove(event);
@@ -149,11 +153,6 @@ const ChessBoard: FunctionComponent<ChessBoardProps> = ({ reverse, game }) => {
                     />
                   );
                 })}
-
-                {/* causes piece opacity to become 0 if placed in the same square */}
-                {/* <DragOverlay zIndex={2}>
-                  {selectedPiece ? <PieceIcon piece={selectedPiece} /> : null}
-                </DragOverlay> */}
               </>
             );
           })}

@@ -22,3 +22,9 @@ export type UserDto = {
   primaryEmail: string;
   password: string;
 };
+
+export type MoveRequest = {
+  piece: Piece;
+  target: Square;
+  jwt: string;
+};

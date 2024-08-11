@@ -24,3 +24,7 @@
   /* overflow: hidden; */
   /* z-index: 1; */
 }
+
+.selected {
+  background-color: #eb4528;
+}

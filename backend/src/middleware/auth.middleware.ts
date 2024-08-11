@@ -4,12 +4,15 @@ import { decode, verify } from "jsonwebtoken";
 const secret = process.env.SECRET ?? "secret";
 
 export async function authorize(ctx: Context, next: () => Promise<any>) {
-  const { headers } = ctx.request;
-  const token = headers.authorization;
+  const {
+    headers: { authorization },
+  } = ctx.request;
 
-  if (!token) {
+  if (!authorization) {
     ctx.throw(401, "Authorization header missing");
   }
+
+  const token = authorization.replace(/Bearer /, "");
 
   const decoded = verify(token, secret);
   console.log(decoded);

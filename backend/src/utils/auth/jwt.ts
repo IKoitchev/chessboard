@@ -1,5 +1,5 @@
 import { JWTOptions, TokenResponse } from "@chessboard/types";
-import { decode, sign, verify } from "jsonwebtoken";
+import { decode, JwtPayload, sign, verify } from "jsonwebtoken";
 
 const secret = process.env.SECRET ?? "secret";
 const host = process.env.HOST ?? "http://localhost:3000";
@@ -41,10 +41,10 @@ export function createJWTResponse(
   return response;
 }
 
-export function decodeJWT(token: string) {
+export function decodeJWT(token: string): JwtPayload {
   const decoded = verify(token, secret);
 
   console.log(decoded);
   console.log(typeof decoded);
-  return decoded;
+  return decoded as JwtPayload;
 }

@@ -23,18 +23,18 @@ export class Move extends Model {
   @BelongsTo(() => Game, {
     foreignKey: "gameId",
   })
-  game: Game;
+  declare game: Game;
 
   @Column(DataType.STRING)
-  targetRank: Rank;
+  declare targetRank: Rank;
 
   @Column(DataType.STRING)
-  targetFile: File;
+  declare targetFile: File;
 
   @Column(DataType.JSON)
-  piece: string;
+  declare piece: string;
 
   @ForeignKey(() => Game)
   @Column(DataType.UUID)
-  gameId: string;
+  declare gameId: string;
 }

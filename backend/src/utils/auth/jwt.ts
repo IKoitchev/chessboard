@@ -6,7 +6,7 @@ const host = process.env.HOST ?? "http://localhost:3000";
 
 export function createJWTResponse(
   sub: string,
-  { aud = host, expires = 3600, refreshToken = true, scope }: JWTOptions
+  { aud = host, expires = 36000, refreshToken = true, scope }: JWTOptions
 ): TokenResponse {
   const iat = Math.floor(Date.now() / 1000);
   const payload = {
@@ -44,7 +44,7 @@ export function createJWTResponse(
 export function decodeJWT(token: string): JwtPayload {
   const decoded = verify(token, secret);
 
-  console.log(decoded);
-  console.log(typeof decoded);
+  // console.log(decoded);
+  // console.log(typeof decoded);
   return decoded as JwtPayload;
 }

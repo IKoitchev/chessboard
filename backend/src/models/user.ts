@@ -5,6 +5,7 @@ import {
   DataType,
   Default,
   ForeignKey,
+  HasMany,
   IsUUID,
   Model,
   PrimaryKey,
@@ -37,4 +38,11 @@ export class User extends Model {
   // Association with the Game model
   @BelongsTo(() => Game, { as: "currentGame" })
   declare currentGame: Game;
+
+  @HasMany(() => Game, { foreignKey: "playerBlackId", as: "BlackGames" })
+  declare blackGames: Game[];
+
+  // Define association for the games where the user is a white player
+  @HasMany(() => Game, { foreignKey: "playerWhiteId", as: "WhiteGames" })
+  declare whiteGames: Game[];
 }

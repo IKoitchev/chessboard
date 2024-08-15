@@ -1,5 +1,5 @@
 import { Context } from "koa";
-import { decode, verify } from "jsonwebtoken";
+import { JwtPayload, verify } from "jsonwebtoken";
 
 const secret = process.env.SECRET ?? "secret";
 
@@ -15,7 +15,8 @@ export async function authorize(ctx: Context, next: () => Promise<any>) {
   const token = authorization.replace(/Bearer /, "");
 
   const decoded = verify(token, secret);
-  console.log(decoded);
+  // console.log(decoded);
 
-  next();
+  ctx.state.tokenInfo = decoded as JwtPayload;
+  await next();
 }

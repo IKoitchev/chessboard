@@ -13,6 +13,8 @@ import { findPieceBySquare } from "../../utils/moves";
 import { letters as files, numbers as ranks } from "../../utils/squares";
 import axios, { type AxiosError } from "axios";
 import { DndContext, type DragMoveEvent } from "@dnd-kit/core";
+import { useWebSocket } from "../WsProvdier";
+import { useUser } from "../UserProvider";
 
 interface ChessBoardProps {
   reverse: boolean;
@@ -34,6 +36,8 @@ const ChessBoard: FunctionComponent<ChessBoardProps> = ({
   const [selectedPiece, setSelectedPiece] = useState<Piece | null>(null);
   const [error] = useState<string | null>(null);
   const [result, setResult] = useState<GameState>(null);
+  const { sendMessage } = useWebSocket();
+  const { getAccessToken } = useUser();
 
   useEffect(() => {
     if (game) {
@@ -56,6 +60,7 @@ const ChessBoard: FunctionComponent<ChessBoardProps> = ({
   }, [selectedPiece]);
 
   const handleClick = async (squareContext: SquareContext) => {
+    console.log("handleclick");
     if (squareContext.piece) {
       setSelectedPiece(squareContext.piece);
       return;
@@ -65,7 +70,9 @@ const ChessBoard: FunctionComponent<ChessBoardProps> = ({
       move(selectedPiece, squareContext);
     }
   };
+
   const dragMove = async (event: DragMoveEvent) => {
+    console.log("dragMove");
     const movingPiece = event.active.data.current as Piece;
     const target = event.over?.data.current as Square;
 
@@ -95,35 +102,14 @@ const ChessBoard: FunctionComponent<ChessBoardProps> = ({
   };
 
   function move(piece: Piece, target: Square) {
+    console.log("move");
     if (piece.file === target.file && piece.rank === target.rank) {
       return;
     }
 
     console.log("piece", piece);
-    axios
-      .post<Game>(`${baseURL}/chessboard/move`, {
-        piece,
-        target,
-        gameId: game.id,
-        playerWhiteId: "1",
-        playerBlackId: "2",
-      })
-      .then(({ data }) => {
-        console.log(data);
-        setPieces(data.pieces);
-        changeTurn(data.moves.length % 2 === 1);
-        setResult(data.result ?? null);
-      })
-      .catch((error) => {
-        console.log(`Error making move: ${error as AxiosError}`);
-        // Revert pieces to the last state received from the server
-        // Because they are set preemtively before the request
-        setPieces([...pieces]);
-      })
-      .finally(() => {
-        console.log("finally");
-        setSelectedPiece(null);
-      });
+
+    sendMessage({ piece, target, jwt: getAccessToken() });
   }
   return (
     <>

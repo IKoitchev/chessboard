@@ -37,6 +37,8 @@ export function squareOf(piece: Piece): Square {
 
 /**
  * Replay the moves of a game and get the current position
+ *
+ * TO-DO: should probably not expect a model
  */
 export function getCurrentPosition(game: GameModel): Game {
   let current: Piece[] = generatePieces();
@@ -247,4 +249,24 @@ export function getGameState(
   } else {
     return "stalemate";
   }
+}
+
+/**
+ * Validate whether the correct player and piece color is being moved
+ */
+export function validTurnOrder(
+  game: Game,
+  pieceColor: Color,
+  playerId: string
+): boolean {
+  const failConditions: boolean[] = [
+    game.moves.length % 2 === 0 && pieceColor === "black",
+    game.moves.length % 2 === 1 && pieceColor === "white",
+    game.moves.length % 2 === 0 && game.playerWhiteId !== playerId,
+    game.moves.length % 2 === 1 && game.playerBlackId !== playerId,
+  ];
+
+  if (failConditions.some(Boolean)) return false;
+
+  return true;
 }

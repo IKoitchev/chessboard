@@ -1,6 +1,5 @@
 import { Game } from "@chessboard/types";
-import { Context } from "koa";
-import Router, { RouterContext } from "koa-router";
+import { RouterContext } from "koa-router";
 import { generatePieces } from "../utils/initBoard";
 import { MakeMoveContext } from "src/dto";
 import { makeMove } from "../utils/makeMove";
@@ -11,34 +10,72 @@ import {
   getCurrentPosition,
   opposingColor,
 } from "../utils/moveUtils";
+import { JwtPayload } from "jsonwebtoken";
+import { Op } from "sequelize";
 
 export async function getGameHandler(ctx: RouterContext) {
   const {
     params: { gameId },
   } = ctx;
 
+  const { sub } = ctx.state.tokenInfo as JwtPayload;
+
+  // Find the existing one by gameId
+  if (gameId) {
+    const game = await GameModel.findOne({
+      where: { id: gameId, result: null },
+      include: [MoveModel],
+    });
+
+    if (!game) {
+      ctx.throw(400, "no game found with this id");
+    }
+    const position: Game = getCurrentPosition(game);
+
+    ctx.body = { ...position };
+  }
+
+  // Find it as the user's current game
+
   const game = await GameModel.findOne({
-    where: { id: gameId, result: null },
+    where: {
+      [Op.or]: [{ playerWhiteId: sub }, { playerBlackId: sub }],
+      result: null,
+    },
     include: [MoveModel],
   });
 
   const position: Game = getCurrentPosition(game);
 
-  ctx.body = { ...position };
-}
+  if (game) {
+    ctx.body = { ...position };
+    return;
+  }
 
-// router.get("/play/:gameId", getGameHandler);
+  // Create a new one
+  // const isWhite = Math.random() * 10 > 5;
 
-export async function startGameHandler(ctx: RouterContext) {
-  // Add metadata such as player names, passed from the context
-  const newGame = await GameModel.create({
-    playerBlackId: "black",
-    playerWhiteId: "white",
-  });
+  const isWhite = true;
 
-  const initialPieces = generatePieces();
+  const args = isWhite
+    ? {
+        playerBlackId: "69591d47-5501-4474-92c7-f7d34c3bb73b",
+        playerWhiteId: sub,
+      }
+    : {
+        playerBlackId: sub,
+        playerWhiteId: "69591d47-5501-4474-92c7-f7d34c3bb73b",
+      };
+  try {
+    const newGame = await GameModel.create(args);
 
-  ctx.body = { ...newGame.dataValues, pieces: initialPieces };
+    const initialPieces = generatePieces();
+
+    ctx.body = { ...newGame.dataValues, pieces: initialPieces };
+  } catch (error) {
+    console.error(error);
+    ctx.throw(500);
+  }
 }
 
 export async function makeMoveHandler(ctx: RouterContext) {
@@ -63,7 +100,8 @@ export async function makeMoveHandler(ctx: RouterContext) {
   if ((game.moves.length % 2 === 0) !== (piece.color === "white")) {
     const errMsg = `It is not ${piece.color} player's turn!`;
     console.error(errMsg);
-    ctx.throw(400, errMsg);
+    ctx.status = 400;
+    ctx.body = errMsg;
   }
 
   const afterMove: Game = makeMove(piece, target, { ...position });
@@ -92,6 +130,5 @@ export async function makeMoveHandler(ctx: RouterContext) {
     });
   }
 
-  // console.log(afterMove.result);
   ctx.body = afterMove;
 }

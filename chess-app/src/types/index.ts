@@ -1,8 +1,7 @@
-export interface Square {
-  // color: Color;
+export type Square = {
   rank: Row;
   file: Column;
-}
+};
 
 export type Color = "black" | "white";
 
@@ -10,13 +9,13 @@ export type Row = "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8";
 
 export type Column = "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h";
 
-export interface Piece {
+export type Piece = {
   rank: Row;
   file: Column;
   color: Color;
   points: number;
   type: PieceType;
-}
+};
 export type PieceType =
   | "Pawn"
   | "King"
@@ -25,14 +24,14 @@ export type PieceType =
   | "Knight"
   | "Rook";
 
-export interface Game {
+export type Game = {
   id: string;
-  playerWhite: Player;
-  playerBlack: Player;
+  playerWhiteId: string;
+  playerBlackId: string;
   pieces: Piece[];
   moves: Move[];
   result?: GameState;
-}
+};
 
 export type GameState =
   | "draw"
@@ -45,20 +44,14 @@ export type SquareContext = Square & {
   piece?: Piece;
 };
 
-export interface Player {
-  id: string;
-  // name: string;
-  // ...
-}
-
-export interface Move {
+export type Move = {
   id: string;
   targetFile: Column;
   targetRank: Row;
   piece: string;
   gameId: string;
-}
-export interface UserInfo {
+};
+export type UserInfo = {
   /**
    * The subject (end-user) identifier. This member is always present in a claims set.
    */
@@ -73,9 +66,9 @@ export interface UserInfo {
    * The end-user's preferred email address.
    */
   email: string;
-}
+};
 
-export interface TokenResponse {
+export type TokenResponse = {
   /**
    * The bearer access token to use for authenticating requests.
    */
@@ -99,4 +92,15 @@ export interface TokenResponse {
   refresh_token?: string;
 
   token_type: "bearer";
-}
+};
+
+export type WsMessage = {
+  jwt: string;
+};
+
+export type MoveRequest = WsMessage & {
+  piece: Piece;
+  target: Square;
+};
+
+export type MoveResponse = Game;

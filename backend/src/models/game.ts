@@ -30,7 +30,7 @@ export class Game extends Model {
   declare playerWhiteId: string;
 
   // Association with the User model as playerWhite
-  @BelongsTo(() => User, { as: "playerWhite" })
+  @BelongsTo(() => User, { as: "playerWhite", foreignKey: "playerWhiteId" })
   declare playerWhite: User;
 
   // Foreign key to the User table for playerBlack
@@ -40,7 +40,7 @@ export class Game extends Model {
   declare playerBlackId: string;
 
   // Association with the User model as playerBlack
-  @BelongsTo(() => User, { as: "playerBlack" })
+  @BelongsTo(() => User, { as: "playerBlack", foreignKey: "playerBlackId" })
   declare playerBlack: User;
 
   @AllowNull(true)

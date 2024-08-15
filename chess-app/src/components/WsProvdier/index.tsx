@@ -7,10 +7,11 @@ import React, {
   ReactNode,
   useMemo,
 } from "react";
+import { MoveRequest } from "../../types";
 
 interface WebSocketContextType {
   messages: string[];
-  sendMessage: (message: string) => void;
+  sendMessage: (message: MoveRequest) => void;
   isConnected: boolean;
 }
 
@@ -36,6 +37,7 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
     };
 
     ws.onmessage = (event) => {
+      console.log("message", event.data);
       setMessages((prevMessages) => [...prevMessages, event.data]);
     };
 
@@ -56,13 +58,14 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
   }, []);
 
   const sendMessage = useCallback(
-    (message: string) => {
+    (message: MoveRequest) => {
       if (socket && isConnected) {
-        socket.send(message);
+        socket.send(JSON.stringify(message));
       }
     },
     [socket, isConnected]
   );
+
   const value = useMemo(
     () => ({
       messages,
@@ -81,8 +84,10 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
 
 export const useWebSocket = (): WebSocketContextType => {
   const context = useContext(WebSocketContext);
+
   if (!context) {
     throw new Error("useWebSocket must be used within a WebSocketProvider");
   }
+
   return context;
 };

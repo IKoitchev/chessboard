@@ -4,7 +4,7 @@ import "./index.css";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import { baseURL } from "../../utils/axiosClient";
-import { type Game } from "../../types";
+import { MoveRequest, type Game } from "../../types";
 import { useUser } from "../UserProvider";
 import { useWebSocket } from "../WsProvdier";
 
@@ -26,33 +26,43 @@ export default function PlayPage() {
   };
 
   const handleStart = async () => {
-    const { data: newGame } = await axios.post<Game>(
-      `${baseURL}/chessboard/play`
-    );
-    console.log(newGame);
-    console.log("naving", `/play/${newGame.id}`);
-    navigate(`/play/${newGame.id}`);
+    axios
+      .get<Game>(`${baseURL}/chessboard/play`, {
+        headers: { authorization: `Bearer ${getAccessToken()}` },
+      })
+      .then((res) => {
+        console.log(res.data);
+        console.log("naving", `/play/${res.data.id}`);
+        navigate(`/play/${res.data.id}`);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   };
 
-  useEffect(() => {
-    console.log(gameId);
-    if (gameId) {
-      axios
-        .get<Game>(`${baseURL}/chessboard/play/${gameId}`)
-        .then((res) => {
-          console.log("get game", res.data);
-          setGame(res.data);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    }
-  }, []);
+  // useEffect(() => {
+  //   console.log(gameId);
+  //   if (gameId) {
+  //     axios
+  //       .get<Game>(`${baseURL}/chessboard/play/${gameId}`, {
+  //         headers: { authorization: `Bearer ${getAccessToken()}` },
+  //       })
+  //       .then((res) => {
+  //         console.log("get game", res.data);
+  //         setGame(res.data);
+  //       })
+  //       .catch((err) => {
+  //         console.log(err);
+  //       });
+  //   }
+  // }, []);
 
   useEffect(() => {
     if (gameId) {
       axios
-        .get<Game>(`${baseURL}/chessboard/play/${gameId}`)
+        .get<Game>(`${baseURL}/chessboard/play/${gameId}`, {
+          headers: { authorization: `Bearer ${getAccessToken()}` },
+        })
         .then((res) => {
           setGame(res.data);
         })
@@ -76,7 +86,9 @@ export default function PlayPage() {
         Test connection
       </button> */}
       <button onClick={() => console.log(isConnected)}>WS</button>
-      <button onClick={() => sendMessage("msg")}>send message</button>
+      <button onClick={() => sendMessage({} as MoveRequest)}>
+        send message
+      </button>
       <button onClick={() => console.log(isConnected)}>WS</button>
       {gameId ? null : (
         <>

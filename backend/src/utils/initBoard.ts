@@ -7,8 +7,6 @@ const letters: File[] = ["a", "b", "c", "d", "e", "f", "g", "h"];
 
 export function initBoard(): Board {
   // create squares
-  console.log("init");
-
   const pieces = generatePieces();
 
   const board: Board = {

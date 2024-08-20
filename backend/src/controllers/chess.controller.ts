@@ -23,7 +23,12 @@ export async function getGameHandler(ctx: RouterContext) {
   // Find the existing one by gameId
   if (gameId) {
     const game = await GameModel.findOne({
-      where: { id: gameId, result: null },
+      where: {
+        id: gameId,
+        result: {
+          [Op.notLike]: "%win%",
+        },
+      },
       include: [MoveModel],
     });
 
@@ -33,6 +38,7 @@ export async function getGameHandler(ctx: RouterContext) {
     const position: Game = getCurrentPosition(game);
 
     ctx.body = { ...position };
+    return;
   }
 
   // Find it as the user's current game
@@ -45,36 +51,36 @@ export async function getGameHandler(ctx: RouterContext) {
     include: [MoveModel],
   });
 
-  const position: Game = getCurrentPosition(game);
+  if (!game) {
+    const isWhite = true;
 
-  if (game) {
-    ctx.body = { ...position };
-    return;
-  }
+    const args = isWhite
+      ? {
+          playerBlackId: "7ba3adb3-961d-4bc1-9308-8b4fb2a1431d",
+          playerWhiteId: sub,
+        }
+      : {
+          playerBlackId: sub,
+          playerWhiteId: "7ba3adb3-961d-4bc1-9308-8b4fb2a1431d",
+        };
 
-  // Create a new one
-  // const isWhite = Math.random() * 10 > 5;
+    try {
+      const newGame = await GameModel.create(args);
 
-  const isWhite = true;
+      const initialPieces = generatePieces();
 
-  const args = isWhite
-    ? {
-        playerBlackId: "69591d47-5501-4474-92c7-f7d34c3bb73b",
-        playerWhiteId: sub,
-      }
-    : {
-        playerBlackId: sub,
-        playerWhiteId: "69591d47-5501-4474-92c7-f7d34c3bb73b",
-      };
-  try {
-    const newGame = await GameModel.create(args);
+      ctx.body = { ...newGame.dataValues, pieces: initialPieces };
+    } catch (error) {
+      console.error(error);
+      ctx.throw(500);
+    }
+  } else {
+    const position: Game = getCurrentPosition(game);
 
-    const initialPieces = generatePieces();
-
-    ctx.body = { ...newGame.dataValues, pieces: initialPieces };
-  } catch (error) {
-    console.error(error);
-    ctx.throw(500);
+    if (game) {
+      ctx.body = { ...position };
+      // return;
+    }
   }
 }
 

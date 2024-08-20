@@ -45,8 +45,6 @@ export function getCurrentPosition(game: GameModel): Game {
 
   const { playerBlackId, playerWhiteId, id, moves } = game;
 
-  // console.log("moveUtils.ts", moves as Move[]);
-
   if (!moves) {
     return {
       pieces: current,
@@ -75,15 +73,29 @@ export function getCurrentPosition(game: GameModel): Game {
     const pieceIndex = current.findIndex(
       (p) => p.file === piece.file && p.rank === piece.rank
     );
-    // console.log("before move", current[pieceIndex]);
 
     current[pieceIndex] = {
-      ...(piece as Piece),
+      ...piece,
       file: move.targetFile,
       rank: move.targetRank,
     };
 
-    // console.log("after move", current[pieceIndex]);
+    //check for castle
+
+    if (
+      piece.type === "King" &&
+      piece.file === "e" &&
+      ["c", "g"].includes(move.targetFile)
+    ) {
+      const shortCastle = move.targetFile === "g";
+      const rookIndex = current.findIndex(
+        (p) => p.file === (shortCastle ? "h" : "a") && p.rank === piece.rank
+      );
+      current[rookIndex] = {
+        ...current[rookIndex],
+        file: shortCastle ? "f" : "d",
+      };
+    }
   }
 
   return {
@@ -120,7 +132,6 @@ export function checkIfCheck(pieces: Piece[], color: Color) {
       const moves = legalMoves(piece, options);
 
       if (moves.find((m) => m.file === king.file && m.rank === king.rank)) {
-        // console.log("piece", piece);
         return true;
       }
     }
@@ -262,8 +273,9 @@ export function validTurnOrder(
   const failConditions: boolean[] = [
     game.moves.length % 2 === 0 && pieceColor === "black",
     game.moves.length % 2 === 1 && pieceColor === "white",
-    game.moves.length % 2 === 0 && game.playerWhiteId !== playerId,
-    game.moves.length % 2 === 1 && game.playerBlackId !== playerId,
+    // should be enabled later
+    // game.moves.length % 2 === 0 && game.playerWhiteId !== playerId,
+    // game.moves.length % 2 === 1 && game.playerBlackId !== playerId,
   ];
 
   if (failConditions.some(Boolean)) return false;

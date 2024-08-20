@@ -15,7 +15,6 @@ export async function authorize(ctx: Context, next: () => Promise<any>) {
   const token = authorization.replace(/Bearer /, "");
 
   const decoded = verify(token, secret);
-  // console.log(decoded);
 
   ctx.state.tokenInfo = decoded as JwtPayload;
   await next();

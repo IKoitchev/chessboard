@@ -1,7 +1,12 @@
-import { Square } from "@chessboard/types";
+import { Game, Move, Piece, Square, type File } from "@chessboard/types";
 import { letters, numbers } from "./squares";
 import { CalcMove } from "src/dto";
-import { squareHasPiece } from "./moveUtils";
+import {
+  squareHasPiece,
+  legalMoves as getLegalMoves,
+  checkIfCheck,
+} from "./moveUtils";
+import { Rook } from "../types/Pieces";
 
 export function getHorizontalAndVerticalMoves(ctx: CalcMove) {
   const {
@@ -289,12 +294,12 @@ export function getLMoves(ctx: CalcMove) {
   return moves;
 }
 
-export function getPawnMoves(ctx: CalcMove) {
+export function getPawnMoves(mvoeInput: CalcMove) {
   const {
     start: { rank, file },
     color: pieceColor,
     pieces,
-  } = ctx;
+  } = mvoeInput;
   const moves: Square[] = [];
 
   // startRankIndex, promRankIndex, captureOffset
@@ -315,7 +320,6 @@ export function getPawnMoves(ctx: CalcMove) {
   };
 
   if (!isBlocked(moveOffset)) {
-    // console.log(file, numbers[numbers.indexOf(rank) + moveOffset]);
     moves.push({
       file,
       rank: numbers[numbers.indexOf(rank) + moveOffset],
@@ -360,3 +364,168 @@ export function getPawnMoves(ctx: CalcMove) {
   }
   return moves;
 }
+
+// Special moves
+
+// export function getSpecialMoves(game: Game, piece: Piece) {
+
+export function getCastleSquares(game: Game, king: Piece): Square[] {
+  if (king.type !== "King") {
+    return [];
+  }
+
+  // Check whether king has moved -> can't castle
+  for (let i = 0; i < game.moves.length; i++) {
+    const movedPiece: Piece = JSON.parse(game.moves[i].piece);
+    if (movedPiece.type === king.type && movedPiece.color === king.color) {
+      return [];
+    }
+  }
+
+  // Check whether each rook has moved -> can't castle long or short respectively
+  const rooks = game.pieces.filter(
+    (p) =>
+      p.type === "Rook" &&
+      p.color === king.color &&
+      p.rank === king.rank &&
+      (p.file === "a" || p.file === "h")
+  );
+
+  if (rooks.length === 0) {
+    return [];
+  }
+
+  // Rook we are castling to
+  let castleRookSquare: Square[] = rooks.map((r) => {
+    return { file: r.file, rank: r.rank };
+  });
+
+  for (const rook of rooks) {
+    const firstMove = game.moves.find(
+      (m) =>
+        (JSON.parse(m.piece) as Piece).type === "Rook" &&
+        (JSON.parse(m.piece) as Piece).color === rook.color &&
+        (JSON.parse(m.piece) as Piece).file === rook.file &&
+        (JSON.parse(m.piece) as Piece).rank === rook.rank
+    );
+
+    if (firstMove) {
+      //this should be tested
+      castleRookSquare = castleRookSquare.filter((sq) => sq.file !== rook.file);
+    }
+  }
+
+  if (castleRookSquare.length === 0) {
+    return [];
+  }
+
+  // Check whether there are any pieces between
+  // The king and the rook -> can't castle
+
+  for (const rook of castleRookSquare) {
+    const kingFileIndex = letters.indexOf(king.file);
+    const rookFileIndex = letters.indexOf(rook.file);
+
+    // Short castle
+    const short = kingFileIndex < rookFileIndex;
+
+    for (const piece of game.pieces) {
+      const pieceFileIndex = letters.indexOf(piece.file);
+
+      if (piece.rank !== king.rank) continue;
+
+      if (
+        short &&
+        pieceFileIndex > kingFileIndex &&
+        pieceFileIndex < rookFileIndex
+      ) {
+        castleRookSquare = castleRookSquare.filter(
+          (sq) => sq.file !== rook.file
+        );
+        break;
+      }
+
+      if (
+        !short &&
+        pieceFileIndex < kingFileIndex &&
+        pieceFileIndex > rookFileIndex
+      ) {
+        castleRookSquare = castleRookSquare.filter(
+          (sq) => sq.file !== rook.file
+        );
+        break;
+      }
+    }
+  }
+
+  for (const rookSq of castleRookSquare) {
+    const kingFileIndex = letters.indexOf(king.file);
+    const rookFileIndex = letters.indexOf(rookSq.file);
+    const short = kingFileIndex < rookFileIndex;
+
+    const kingSquares: Square[] = [
+      { rank: king.rank, file: king.file },
+      {
+        rank: king.rank,
+        file: short
+          ? letters[letters.indexOf(king.file) + 1]
+          : letters[letters.indexOf(king.file) - 1],
+      },
+      {
+        rank: king.rank,
+        file: short
+          ? letters[letters.indexOf(king.file) + 2]
+          : letters[letters.indexOf(king.file) - 2],
+      },
+    ];
+
+    for (const square of kingSquares) {
+      const enemyMoves = game.pieces.find((p) => {
+        const options: CalcMove = {
+          start: { rank: p.rank, file: p.file },
+          pieces: game.pieces,
+          color: p.color,
+        };
+
+        const legalMoves = getLegalMoves(p, options);
+
+        if (
+          p.color !== king.color &&
+          legalMoves.some(
+            (m) => m.file === square.file && m.rank === square.rank
+          )
+        ) {
+          return true;
+        }
+        return false;
+      });
+
+      if (enemyMoves) {
+        castleRookSquare = castleRookSquare.filter(
+          (sq) => sq.file !== rookSq.file
+        );
+        // castleRookSquare.splice(castleRookSquare.indexOf(rookSq));
+      }
+    }
+  }
+  let kingSquares: Square[] = [];
+
+  for (const rookSq of castleRookSquare) {
+    const kingFileIndex = letters.indexOf(king.file);
+    const rookFileIndex = letters.indexOf(rookSq.file);
+
+    // Short castle
+    const short = kingFileIndex < rookFileIndex;
+    kingSquares.push({
+      rank: king.rank,
+      file: short
+        ? letters[letters.indexOf(king.file) + 2]
+        : letters[letters.indexOf(king.file) - 2],
+    });
+  }
+  return kingSquares;
+}
+
+export function enPassant() {}
+
+export function promote() {}

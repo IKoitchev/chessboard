@@ -21,14 +21,12 @@ export function createJWTResponse(
     sub,
   };
 
-  // console.log(payload, iat, expires);
   const response: TokenResponse = {
     // The access token token expires in an hour.
     access_token: sign({ ...payload, exp: iat + expires }, secret),
     expires_in: expires,
     token_type: "bearer",
   };
-  // console.log(response);
 
   if (refreshToken) {
     // The refresh token token expires in a month.
@@ -44,7 +42,5 @@ export function createJWTResponse(
 export function decodeJWT(token: string): JwtPayload {
   const decoded = verify(token, secret);
 
-  // console.log(decoded);
-  // console.log(typeof decoded);
   return decoded as JwtPayload;
 }

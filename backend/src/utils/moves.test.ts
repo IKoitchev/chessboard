@@ -1,12 +1,15 @@
-import { Piece, Square } from "@chessboard/types";
+import { Game, Move, Piece, Square } from "@chessboard/types";
 import { describe, expect, it } from "vitest";
 import {
+  getCastleSquares,
   getDiagonalMoves,
   getHorizontalAndVerticalMoves,
   getLMoves,
   getPawnMoves,
 } from "./moves";
 import { CalcMove } from "../dto";
+import { Knight, Pawn, Rook } from "../types/Pieces";
+import { initBoard } from "./initBoard";
 
 describe("Moves", () => {
   describe("Vertical and horizontal", () => {
@@ -862,6 +865,502 @@ describe("Moves", () => {
       const expected: [] = [];
 
       expect(moves).toEqual(expected);
+    });
+  });
+  describe("Castle", () => {
+    //globals
+    const king: Piece = {
+      file: "e",
+      rank: "1",
+      color: "white",
+      points: 1,
+      type: "King",
+    };
+    const kingBlack: Piece = {
+      file: "e",
+      rank: "8",
+      color: "black",
+      points: 1,
+      type: "King",
+    };
+    const rookA: Piece = {
+      file: "a",
+      rank: "1",
+      color: "white",
+      points: 5,
+      type: "Rook",
+    };
+    const rookH: Piece = {
+      file: "h",
+      rank: "1",
+      color: "white",
+      points: 5,
+      type: "Rook",
+    };
+
+    const [shortW, longW]: Square[] = [
+      { file: "g", rank: "1" },
+      { file: "c", rank: "1" },
+    ];
+    const [shortB, longB]: Square[] = [
+      { file: "g", rank: "8" },
+      { file: "c", rank: "8" },
+    ];
+
+    describe("No moves", () => {
+      it("should be able to castle both ways", () => {
+        const pieces: Piece[] = [king, rookA, rookH];
+
+        const game: Game = {
+          id: "id",
+          moves: [],
+          pieces,
+          playerBlackId: "1",
+          playerWhiteId: "2",
+        };
+
+        const castle = getCastleSquares(game, king);
+
+        expect(castle).toMatchObject([longW, shortW]);
+      });
+      it("should be able to castle long only - 1 rook present", () => {
+        const pieces: Piece[] = [king, rookA];
+
+        const game: Game = {
+          id: "id",
+          moves: [],
+          pieces,
+          playerBlackId: "1",
+          playerWhiteId: "2",
+        };
+
+        const castle = getCastleSquares(game, king);
+
+        expect(castle).toMatchObject([longW]);
+      });
+      it("should be able to castle short only - 1 rook present", () => {
+        const pieces: Piece[] = [king, rookH];
+
+        const game: Game = {
+          id: "id",
+          moves: [],
+          pieces,
+          playerBlackId: "1",
+          playerWhiteId: "2",
+        };
+
+        const castle = getCastleSquares(game, king);
+
+        expect(castle).toMatchObject([shortW]);
+      });
+    });
+    describe("Rook has moved and returned", () => {
+      it("should castle short only", () => {
+        const pieces: Piece[] = [king, rookA, rookH];
+
+        const moves: Move[] = [
+          {
+            gameId: "id",
+            id: "2",
+            piece: JSON.stringify(rookA),
+            targetFile: "a",
+            targetRank: "1",
+          },
+          {
+            gameId: "id",
+            id: "1",
+            piece: JSON.stringify(rookA),
+            targetFile: "a",
+            targetRank: "2",
+          },
+        ];
+
+        const game: Game = {
+          id: "id",
+          moves,
+          pieces,
+          playerBlackId: "1",
+          playerWhiteId: "2",
+        };
+
+        const castle = getCastleSquares(game, king);
+
+        expect(castle).toMatchObject([shortW]);
+      });
+      it("should castle long only", () => {
+        const pieces: Piece[] = [king, rookA, rookH];
+
+        const moves: Move[] = [
+          {
+            gameId: "id",
+            id: "2",
+            piece: JSON.stringify(rookH),
+            targetFile: "h",
+            targetRank: "1",
+          },
+          {
+            gameId: "id",
+            id: "1",
+            piece: JSON.stringify(rookH),
+            targetFile: "h",
+            targetRank: "2",
+          },
+        ];
+
+        const game: Game = {
+          id: "id",
+          moves,
+          pieces,
+          playerBlackId: "1",
+          playerWhiteId: "2",
+        };
+
+        const castle = getCastleSquares(game, king);
+
+        expect(castle).toMatchObject([longW]);
+      });
+      it("should not castle", () => {
+        const pieces: Piece[] = [king, rookA, rookH];
+
+        const moves: Move[] = [
+          {
+            gameId: "id",
+            id: "1",
+            piece: JSON.stringify(rookH),
+            targetFile: "h",
+            targetRank: "2",
+          },
+          {
+            gameId: "id",
+            id: "2",
+            piece: JSON.stringify(rookH),
+            targetFile: "h",
+            targetRank: "1",
+          },
+          {
+            gameId: "id",
+            id: "1",
+            piece: JSON.stringify(rookA),
+            targetFile: "a",
+            targetRank: "2",
+          },
+          {
+            gameId: "id",
+            id: "2",
+            piece: JSON.stringify(rookA),
+            targetFile: "a",
+            targetRank: "1",
+          },
+        ];
+
+        const game: Game = {
+          id: "id",
+          moves,
+          pieces,
+          playerBlackId: "1",
+          playerWhiteId: "2",
+        };
+
+        const castle = getCastleSquares(game, king);
+
+        expect(castle).toMatchObject([]);
+      });
+    });
+    describe("Rooks have moved and haven't returned", () => {
+      //locals
+      const king: Piece = {
+        file: "e",
+        rank: "1",
+        color: "white",
+        points: 1,
+        type: "King",
+      };
+      const rookA: Piece = {
+        file: "a",
+        rank: "2",
+        color: "white",
+        points: 5,
+        type: "Rook",
+      };
+      const rookH: Piece = {
+        file: "h",
+        rank: "2",
+        color: "white",
+        points: 5,
+        type: "Rook",
+      };
+      it("should not castle", () => {
+        const pieces: Piece[] = [king, rookA, rookH];
+
+        const game: Game = {
+          id: "id",
+          moves: [],
+          pieces,
+          playerBlackId: "1",
+          playerWhiteId: "2",
+        };
+
+        const castle = getCastleSquares(game, king);
+
+        expect(castle).toMatchObject([]);
+      });
+    });
+    describe("King moved", () => {
+      it("should not castle", () => {
+        const pieces: Piece[] = [king, rookA, rookH];
+        const moves: Move[] = [
+          {
+            gameId: "id",
+            id: "2",
+            piece: JSON.stringify(king),
+            targetFile: "e",
+            targetRank: "2",
+          },
+          {
+            gameId: "id",
+            id: "3",
+            piece: JSON.stringify(king),
+            targetFile: "e",
+            targetRank: "1",
+          },
+        ];
+
+        const game: Game = {
+          id: "id",
+          moves,
+          pieces,
+          playerBlackId: "1",
+          playerWhiteId: "2",
+        };
+
+        const castle = getCastleSquares(game, king);
+
+        expect(castle).toMatchObject([]);
+      });
+    });
+    describe("Blocking piece", () => {
+      const blackKnight = new Knight({ file: "g", rank: "1" }, "black");
+      const whiteKnight = new Knight({ file: "b", rank: "1" }, "white");
+
+      it("should not castle - blocking opponent piece", () => {
+        const pieces: Piece[] = [king, rookA, rookH, blackKnight];
+
+        const game: Game = {
+          id: "id",
+          moves: [],
+          pieces,
+          playerBlackId: "1",
+          playerWhiteId: "2",
+        };
+        const castle = getCastleSquares(game, king);
+
+        expect(castle).toMatchObject([{ file: "c", rank: "1" }]);
+      });
+      it("should not castle - own blocking piece", () => {
+        const pieces: Piece[] = [king, rookA, rookH, whiteKnight];
+
+        const game: Game = {
+          id: "id",
+          moves: [],
+          pieces,
+          playerBlackId: "1",
+          playerWhiteId: "2",
+        };
+        const castle = getCastleSquares(game, king);
+
+        expect(castle).toMatchObject([{ file: "g", rank: "1" }]);
+      });
+      it("should not castle - both sides blocked", () => {
+        const pieces: Piece[] = [king, rookA, rookH, whiteKnight, blackKnight];
+
+        const game: Game = {
+          id: "id",
+          moves: [],
+          pieces,
+          playerBlackId: "1",
+          playerWhiteId: "2",
+        };
+        const castle = getCastleSquares(game, king);
+
+        expect(castle).toMatchObject([]);
+      });
+    });
+    describe("Targeted square", () => {
+      it("should not castle short - 2", () => {
+        const blackRook = new Rook({ file: "g", rank: "8" }, "black");
+        const pieces: Piece[] = [king, rookA, rookH, blackRook];
+
+        const game: Game = {
+          id: "id",
+          moves: [],
+          pieces,
+          playerBlackId: "1",
+          playerWhiteId: "2",
+        };
+
+        const castle = getCastleSquares(game, king);
+
+        expect(castle).toMatchObject([longW]);
+      });
+      it("should not castle long", () => {
+        const blackRook = new Rook({ file: "c", rank: "8" }, "black");
+        const pieces: Piece[] = [king, rookA, rookH, blackRook];
+
+        const game: Game = {
+          id: "id",
+          moves: [],
+          pieces,
+          playerBlackId: "1",
+          playerWhiteId: "2",
+        };
+
+        const castle = getCastleSquares(game, king);
+
+        expect(castle).toMatchObject([shortW]);
+      });
+      it("should not castle short - 2", () => {
+        const blackRook = new Rook({ file: "f", rank: "8" }, "black");
+        const pieces: Piece[] = [king, rookA, rookH, blackRook];
+
+        const game: Game = {
+          id: "id",
+          moves: [],
+          pieces,
+          playerBlackId: "1",
+          playerWhiteId: "2",
+        };
+
+        const castle = getCastleSquares(game, king);
+
+        expect(castle).toMatchObject([longW]);
+      });
+      it("should not castle long", () => {
+        const blackRook = new Rook({ file: "d", rank: "8" }, "black");
+        const pieces: Piece[] = [king, rookA, rookH, blackRook];
+
+        const game: Game = {
+          id: "id",
+          moves: [],
+          pieces,
+          playerBlackId: "1",
+          playerWhiteId: "2",
+        };
+
+        const castle = getCastleSquares(game, king);
+
+        expect(castle).toMatchObject([shortW]);
+      });
+      it("should not castle - check", () => {
+        const blackRook = new Rook({ file: "e", rank: "8" }, "black");
+        const pieces: Piece[] = [king, rookA, rookH, blackRook];
+
+        const game: Game = {
+          id: "id",
+          moves: [],
+          pieces,
+          playerBlackId: "1",
+          playerWhiteId: "2",
+        };
+
+        const castle = getCastleSquares(game, king);
+
+        expect(castle).toMatchObject([]);
+      });
+      it("should not castle - multiple fields targeted by 1 piece", () => {
+        const blackBishop = new Rook({ file: "e", rank: "2" }, "black");
+
+        const pieces: Piece[] = [king, rookA, rookH, blackBishop];
+
+        const game: Game = {
+          id: "id",
+          moves: [],
+          pieces,
+          playerBlackId: "1",
+          playerWhiteId: "2",
+        };
+
+        const castle = getCastleSquares(game, king);
+
+        expect(castle).toMatchObject([]);
+      });
+      it("should castle", () => {
+        const blackRook1 = new Rook({ file: "b", rank: "8" }, "black");
+        const blackRook2 = new Rook({ file: "a", rank: "8" }, "black");
+        const blackRook3 = new Rook({ file: "h", rank: "8" }, "black");
+        const pieces: Piece[] = [
+          king,
+          rookA,
+          rookH,
+          blackRook1,
+          blackRook2,
+          blackRook3,
+        ];
+
+        const game: Game = {
+          id: "id",
+          moves: [],
+          pieces,
+          playerBlackId: "1",
+          playerWhiteId: "2",
+        };
+
+        const castle = getCastleSquares(game, king);
+
+        expect(castle).toMatchObject([longW, shortW]);
+      });
+    });
+
+    it("should castle - pawn blocking target square", () => {
+      const whitePawn = new Pawn({ file: "g", rank: "3" }, "white");
+      const blackRook = new Rook({ file: "g", rank: "8" }, "black");
+      const pieces: Piece[] = [king, rookA, rookH, blackRook, whitePawn];
+
+      const game: Game = {
+        id: "id",
+        moves: [],
+        pieces,
+        playerBlackId: "1",
+        playerWhiteId: "2",
+      };
+
+      const castle = getCastleSquares(game, king);
+
+      expect(castle).toMatchObject([longW, shortW]);
+    });
+
+    it("should not castle - starting position Black/White", () => {
+      const { pieces } = initBoard();
+      const game: Game = {
+        id: "id",
+        moves: [],
+        pieces,
+        playerBlackId: "1",
+        playerWhiteId: "2",
+      };
+      const castleW = getCastleSquares(game, king);
+      const castleB = getCastleSquares(game, kingBlack);
+
+      expect(castleW).toMatchObject([]);
+      expect(castleB).toMatchObject([]);
+    });
+    it("should castle both ways - no queen, knight, bishop", () => {
+      const { pieces } = initBoard();
+
+      const game: Game = {
+        id: "id",
+        moves: [],
+        pieces: pieces.filter(
+          (p) =>
+            p.type !== "Bishop" && p.type !== "Queen" && p.type !== "Knight"
+        ),
+        playerBlackId: "1",
+        playerWhiteId: "2",
+      };
+      const castleW = getCastleSquares(game, king);
+      const castleB = getCastleSquares(game, kingBlack);
+
+      expect(castleW).toMatchObject([longW, shortW]);
+      expect(castleB).toMatchObject([longB, shortB]);
     });
   });
 });

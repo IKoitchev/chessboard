@@ -65,7 +65,9 @@ const moveRoutes: Middleware = (ctx) => {
 
     if (!validTurnOrder(position, piece.color, token.sub)) {
       const errorMsg = `It is not ${piece.color} player's turn!`;
-      ctx.websocket.send(JSON.stringify({ errorMsg, status: 400 }));
+      ctx.websocket.send(
+        JSON.stringify({ errorMsg, status: 400, pieces: position.pieces })
+      );
       return;
     }
 
@@ -93,7 +95,7 @@ const moveRoutes: Middleware = (ctx) => {
       });
     }
 
-    console.log(afterMove);
+    console.log("afterMove", afterMove);
     ctx.websocket.send(JSON.stringify(afterMove));
   });
 

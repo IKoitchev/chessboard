@@ -15,9 +15,10 @@ const app = websockify(new Koa());
 
 // Generic error handling middleware.
 
-// sequelize.sync();
-sequelize.sync({ alter: true });
+sequelize.sync();
 
+// sequelize.sync({ alter: true });
+// sequelize.drop();
 app.use(cors());
 app.use(logger());
 app.use(bodyParser());

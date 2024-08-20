@@ -36,7 +36,8 @@ const ChessBoard: FunctionComponent<ChessBoardProps> = ({
   const [selectedPiece, setSelectedPiece] = useState<Piece | null>(null);
   const [error] = useState<string | null>(null);
   const [result, setResult] = useState<GameState>(null);
-  const { sendMessage } = useWebSocket();
+
+  const { sendMessage, isConnected, messages } = useWebSocket();
   const { getAccessToken } = useUser();
 
   useEffect(() => {
@@ -49,6 +50,19 @@ const ChessBoard: FunctionComponent<ChessBoardProps> = ({
   useEffect(() => {
     console.log("pcs", pieces);
   }, [pieces]);
+
+  useEffect(() => {
+    if (messages && messages.length > 0) {
+      const latest = JSON.parse(messages[messages.length - 1]);
+
+      setPieces((latest as Game).pieces);
+
+      // Do some errorhandling
+      if (!latest.errorMsg) {
+      } else {
+      }
+    }
+  }, [messages]);
 
   useEffect(() => {
     console.log(
@@ -115,44 +129,47 @@ const ChessBoard: FunctionComponent<ChessBoardProps> = ({
     <>
       {error ?? null}
       {result}
+      {isConnected ? (
+        <DndContext
+          onDragEnd={async (event) => {
+            await dragMove(event);
+          }}
+        >
+          <div className="chessboard">
+            {(reverse ? [...numbers].reverse() : numbers).map((number, i) => {
+              return (
+                <>
+                  <div key={i} className="label rank">
+                    {number}
+                  </div>
+                  {(reverse ? [...letters].reverse() : letters).map(
+                    (letter) => {
+                      return (
+                        <SquareComponent
+                          key={letter + number}
+                          file={letter}
+                          rank={number}
+                          piece={findPieceBySquare(pieces, letter, number)}
+                          onClick={handleClick}
+                        />
+                      );
+                    }
+                  )}
+                </>
+              );
+            })}
 
-      <DndContext
-        onDragEnd={async (event) => {
-          await dragMove(event);
-        }}
-      >
-        <div className="chessboard">
-          {(reverse ? [...numbers].reverse() : numbers).map((number, i) => {
-            return (
-              <>
-                <div key={i} className="label rank">
-                  {number}
+            <div className="corner"></div>
+            {(reverse ? [...letters].reverse() : letters).map((letter) => {
+              return (
+                <div key={letter} className="label file">
+                  {letter.toLocaleUpperCase()}
                 </div>
-                {(reverse ? [...letters].reverse() : letters).map((letter) => {
-                  return (
-                    <SquareComponent
-                      key={letter + number}
-                      file={letter}
-                      rank={number}
-                      piece={findPieceBySquare(pieces, letter, number)}
-                      onClick={handleClick}
-                    />
-                  );
-                })}
-              </>
-            );
-          })}
-
-          <div className="corner"></div>
-          {(reverse ? [...letters].reverse() : letters).map((letter) => {
-            return (
-              <div key={letter} className="label file">
-                {letter.toLocaleUpperCase()}
-              </div>
-            );
-          })}
-        </div>
-      </DndContext>
+              );
+            })}
+          </div>
+        </DndContext>
+      ) : null}
     </>
   );
 };

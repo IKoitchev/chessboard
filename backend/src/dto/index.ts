@@ -1,4 +1,4 @@
-import { Color, Piece, Square } from "@chessboard/types";
+import { Color, Game, Piece, Square } from "@chessboard/types";
 
 export type MakeMoveContext = {
   piece: Piece;
@@ -27,4 +27,5 @@ export type MoveRequest = {
   piece: Piece;
   target: Square;
   jwt: string;
+  game: Game;
 };

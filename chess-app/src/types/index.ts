@@ -101,6 +101,7 @@ export type WsMessage = {
 export type MoveRequest = WsMessage & {
   piece: Piece;
   target: Square;
+  game?: Game;
 };
 
 export type MoveResponse = Game;

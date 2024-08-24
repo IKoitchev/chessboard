@@ -22,9 +22,36 @@ import { JwtPayload } from "jsonwebtoken";
 // Define a WebSocket middleware function
 const moveRoutes: Middleware = (ctx) => {
   ctx.websocket.on("message", async (message) => {
-    const { jwt, piece, target } = JSON.parse(String(message)) as MoveRequest;
+    const {
+      jwt,
+      piece,
+      target,
+      game: gameObj,
+    } = JSON.parse(String(message)) as MoveRequest;
 
-    // ctx.websocket.send("countermessage");
+    //its a practice game
+    if (gameObj && piece && target) {
+      const position: Game = getCurrentPosition(gameObj);
+
+      if (!validTurnOrder(position, piece.color)) {
+        const errorMsg = `It is not ${piece.color} player's turn!`;
+        ctx.websocket.send(
+          JSON.stringify({ errorMsg, status: 400, pieces: position.pieces })
+        );
+        return;
+      }
+
+      const afterMove: Game = makeMove(piece, target, { ...position });
+
+      const gameState = checkIfMateOrStalemate(
+        afterMove.pieces,
+        opposingColor(piece)
+      );
+
+      afterMove.result = gameState;
+      ctx.websocket.send(JSON.stringify({ ...afterMove }));
+      return;
+    }
 
     if ([jwt, piece, target].some((prop) => !prop)) {
       console.log("Validation failed", { jwt, piece, target });
@@ -39,7 +66,7 @@ const moveRoutes: Middleware = (ctx) => {
     } catch (error) {
       const errorMsg = "Unauthorized";
       console.error(errorMsg);
-      ctx.websocket.send(errorMsg);
+      ctx.websocket.send(JSON.stringify({ errorMsg }));
       return;
     }
 

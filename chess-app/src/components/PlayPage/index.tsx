@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import ChessBoard from "../Chessboard";
 import "./index.css";
 import { useNavigate, useParams } from "react-router-dom";
-import axios from "axios";
+import axios, { AxiosRequestConfig } from "axios";
 import { baseURL } from "../../utils/axiosClient";
 import { MoveRequest, type Game } from "../../types";
 import { useUser } from "../UserProvider";
@@ -14,7 +14,7 @@ export default function PlayPage() {
   const { gameId } = useParams();
   const navigate = useNavigate();
   const [isBlackTurn, setBlackTurn] = useState<boolean>(false);
-  const { getAccessToken } = useUser();
+  const { getAccessToken, isLoggedIn } = useUser();
   const { isConnected, messages, sendMessage } = useWebSocket();
 
   const handleReverse = () => {
@@ -26,41 +26,26 @@ export default function PlayPage() {
   };
 
   const handleStart = async () => {
-    axios
-      .get<Game>(`${baseURL}/chessboard/play`, {
-        headers: { authorization: `Bearer ${getAccessToken()}` },
-      })
-      .then((res) => {
-        console.log(res.data);
-        console.log("naving", `/play/${res.data.id}`);
-        navigate(`/play/${res.data.id}`);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+    if (isLoggedIn) {
+      axios
+        .get<Game>(`${baseURL}/chessboard/play`, {
+          headers: { authorization: `Bearer ${getAccessToken()}` },
+        })
+        .then((res) => {
+          console.log(res.data);
+          console.log("naving", `/play/${res.data.id}`);
+          navigate(`/play/${res.data.id}`);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    }
   };
 
-  // useEffect(() => {
-  //   console.log(gameId);
-  //   if (gameId) {
-  //     axios
-  //       .get<Game>(`${baseURL}/chessboard/play/${gameId}`, {
-  //         headers: { authorization: `Bearer ${getAccessToken()}` },
-  //       })
-  //       .then((res) => {
-  //         console.log("get game", res.data);
-  //         setGame(res.data);
-  //       })
-  //       .catch((err) => {
-  //         console.log(err);
-  //       });
-  //   }
-  // }, []);
-
   useEffect(() => {
-    if (gameId) {
+    if (isLoggedIn) {
       axios
-        .get<Game>(`${baseURL}/chessboard/play/${gameId}`, {
+        .get<Game>(`${baseURL}/chessboard/play`, {
           headers: { authorization: `Bearer ${getAccessToken()}` },
         })
         .then((res) => {
@@ -69,27 +54,24 @@ export default function PlayPage() {
         .catch((err) => {
           console.log(err);
         });
+    } else {
+      axios
+        .get<Game>(`${baseURL}/chessboard/practice`)
+        .then((res) => {
+          setGame((old) => {
+            console.log(res.data);
+            const updated: Game = { ...res.data, moves: old?.moves || [] };
+            return updated;
+          });
+        })
+        .catch((err) => {
+          console.log(err);
+        });
     }
-  }, [gameId]);
+  }, []);
+
   return (
     <>
-      {/* <button
-        onClick={() => {
-          axios
-            .get(`${baseURL}/chessboard/protected`, {
-              headers: { authorization: `Bearer ${getAccessToken()}` },
-            })
-            .then((res) => console.log(res))
-            .catch((err) => console.log(err.message));
-        }}
-      >
-        Test connection
-      </button> */}
-      <button onClick={() => console.log(isConnected)}>WS</button>
-      <button onClick={() => sendMessage({} as MoveRequest)}>
-        send message
-      </button>
-      <button onClick={() => console.log(isConnected)}>WS</button>
       {gameId ? null : (
         <>
           <button onClick={handleReverse}>Reverse</button>
@@ -104,7 +86,7 @@ export default function PlayPage() {
           <>
             <ChessBoard
               reverse={isBlackPOV}
-              isPractice={!gameId}
+              isPractice={!Boolean(gameId)}
               game={game}
               changeTurn={setBlackTurn}
             />

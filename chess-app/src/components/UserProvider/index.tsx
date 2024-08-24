@@ -4,12 +4,13 @@ import {
   ReactNode,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
 } from "react";
 import { TokenResponse, UserInfo } from "../../types";
 import axios from "axios";
-import { decodeJwt } from "jose";
+import { decodeJwt, JWTPayload } from "jose";
 import { useNavigate } from "react-router-dom";
 import apiUrl from "../../utils/apiUrl";
 
@@ -49,6 +50,21 @@ export function UserProvider({ children }: UserProviderProps) {
   const [state, setState] = useState(initialState);
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const token = localStorage.getItem(ACCESS_TOKEN);
+
+    if (token) {
+      const payload = JSON.parse(atob(token.split(".")[1])) as JWTPayload;
+
+      if (payload.exp && payload.exp * 1000 < Date.now()) {
+        logout();
+      }
+
+      setState({ isLoggedIn: true });
+    }
+    // logout();
+  }, []);
+
   const getAccessToken = useCallback(() => {
     const token = String(localStorage.getItem(ACCESS_TOKEN));
     console.log(token);
@@ -58,8 +74,10 @@ export function UserProvider({ children }: UserProviderProps) {
 
   const logout = useCallback((redirectTo?: string) => {
     localStorage.removeItem(REFRESH_TOKEN);
+    localStorage.removeItem(ACCESS_TOKEN);
     setState(initialState);
     setUserInfo(null);
+    console.log("logout");
 
     if (redirectTo) {
       navigate(redirectTo);

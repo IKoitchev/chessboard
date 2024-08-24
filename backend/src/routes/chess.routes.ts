@@ -1,6 +1,7 @@
 import Router, { IRouterOptions, RouterContext } from "koa-router";
 import {
-  getGameHandler,
+  getCurrentGameHandler,
+  getPracticeGameHandler,
   makeMoveHandler,
 } from "../controllers/chess.controller";
 import { Context } from "koa";
@@ -16,7 +17,7 @@ const routerOpts: IRouterOptions = {
 
 const router: Router = new Router(routerOpts);
 
-router.get("/play/:gameId?", authorize, getGameHandler);
+router.get("/play", authorize, getCurrentGameHandler);
 
 router.get("/castle", async (ctx: RouterContext) => {
   const king: Piece = {
@@ -56,12 +57,18 @@ router.get("/castle", async (ctx: RouterContext) => {
   ctx.body = castle;
 });
 
-router.get("/delete/:gameId?", authorize, async (ctx: RouterContext) => {
+router.get("/delete/:gameId?", async (ctx: RouterContext) => {
   const { gameId } = ctx.params;
 
+  if (!gameId) {
+    await GameModel.destroy({ truncate: true, cascade: true });
+    return;
+  }
   await GameModel.destroy({ where: { id: gameId } });
 
   ctx.status = 204;
 });
+
+router.get("/practice", getPracticeGameHandler);
 
 export default router;

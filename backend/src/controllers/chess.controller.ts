@@ -1,6 +1,6 @@
 import { Game } from "@chessboard/types";
 import { RouterContext } from "koa-router";
-import { generatePieces } from "../utils/initBoard";
+import { generatePieces, initBoard } from "../utils/initBoard";
 import { MakeMoveContext } from "src/dto";
 import { makeMove } from "../utils/makeMove";
 import { Game as GameModel } from "../models/game";
@@ -13,33 +13,18 @@ import {
 import { JwtPayload } from "jsonwebtoken";
 import { Op } from "sequelize";
 
-export async function getGameHandler(ctx: RouterContext) {
-  const {
-    params: { gameId },
-  } = ctx;
-
+/**
+ * Get ongoing game for the player logged in
+ *
+ * Or start a new one - this should be changed to start queue for a match
+ *
+ * @param ctx
+ * @returns
+ */
+export async function getCurrentGameHandler(ctx: RouterContext) {
   const { sub } = ctx.state.tokenInfo as JwtPayload;
 
   // Find the existing one by gameId
-  if (gameId) {
-    const game = await GameModel.findOne({
-      where: {
-        id: gameId,
-        result: {
-          [Op.notLike]: "%win%",
-        },
-      },
-      include: [MoveModel],
-    });
-
-    if (!game) {
-      ctx.throw(400, "no game found with this id");
-    }
-    const position: Game = getCurrentPosition(game);
-
-    ctx.body = { ...position };
-    return;
-  }
 
   // Find it as the user's current game
 
@@ -64,23 +49,55 @@ export async function getGameHandler(ctx: RouterContext) {
           playerWhiteId: "7ba3adb3-961d-4bc1-9308-8b4fb2a1431d",
         };
 
-    try {
-      const newGame = await GameModel.create(args);
+    const initialPieces = generatePieces();
 
-      const initialPieces = generatePieces();
+    const practiceGame: Game = {
+      id: "practice",
+      moves: [],
+      pieces: initialPieces,
+      playerBlackId: null,
+      playerWhiteId: null,
+    };
 
-      ctx.body = { ...newGame.dataValues, pieces: initialPieces };
-    } catch (error) {
-      console.error(error);
-      ctx.throw(500);
-    }
+    ctx.body = { ...practiceGame };
   } else {
     const position: Game = getCurrentPosition(game);
 
     if (game) {
       ctx.body = { ...position };
-      // return;
+      return;
     }
+  }
+}
+
+/**
+ * Get (part of) the game history of the player
+ * @param ctx
+ * @returns
+ */
+export async function getPastGameHandler(ctx: RouterContext) {
+  const {
+    params: { gameId },
+  } = ctx;
+
+  if (gameId) {
+    const game = await GameModel.findOne({
+      where: {
+        id: gameId,
+        result: {
+          [Op.notLike]: "%win%",
+        },
+      },
+      include: [MoveModel],
+    });
+
+    if (!game) {
+      ctx.throw(400, `no game found with id '${gameId}'`);
+    }
+    const position: Game = getCurrentPosition(game);
+
+    ctx.body = { ...position };
+    return;
   }
 }
 
@@ -137,4 +154,10 @@ export async function makeMoveHandler(ctx: RouterContext) {
   }
 
   ctx.body = afterMove;
+}
+
+export async function getPracticeGameHandler(ctx: RouterContext) {
+  const { pieces } = initBoard();
+
+  ctx.body = { pieces };
 }

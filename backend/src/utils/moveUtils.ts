@@ -40,7 +40,7 @@ export function squareOf(piece: Piece): Square {
  *
  * TO-DO: should probably not expect a model
  */
-export function getCurrentPosition(game: GameModel): Game {
+export function getCurrentPosition(game: Game | GameModel): Game {
   let current: Piece[] = generatePieces();
 
   const { playerBlackId, playerWhiteId, id, moves } = game;
@@ -268,7 +268,7 @@ export function getGameState(
 export function validTurnOrder(
   game: Game,
   pieceColor: Color,
-  playerId: string
+  playerId?: string
 ): boolean {
   const failConditions: boolean[] = [
     game.moves.length % 2 === 0 && pieceColor === "black",

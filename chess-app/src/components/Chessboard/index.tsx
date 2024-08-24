@@ -1,7 +1,7 @@
 import { type FunctionComponent, useEffect, useState } from "react";
 import "./index.css";
-import { baseURL } from "../../utils/axiosClient";
 import {
+  Move,
   type Game,
   type GameState,
   type Piece,
@@ -11,7 +11,6 @@ import {
 import SquareComponent from "../Square";
 import { findPieceBySquare } from "../../utils/moves";
 import { letters as files, numbers as ranks } from "../../utils/squares";
-import axios, { type AxiosError } from "axios";
 import { DndContext, type DragMoveEvent } from "@dnd-kit/core";
 import { useWebSocket } from "../WsProvdier";
 import { useUser } from "../UserProvider";
@@ -36,9 +35,10 @@ const ChessBoard: FunctionComponent<ChessBoardProps> = ({
   const [selectedPiece, setSelectedPiece] = useState<Piece | null>(null);
   const [error] = useState<string | null>(null);
   const [result, setResult] = useState<GameState>(null);
+  const [moves, setMoves] = useState<Move[]>([]);
 
   const { sendMessage, isConnected, messages } = useWebSocket();
-  const { getAccessToken } = useUser();
+  const { getAccessToken, isLoggedIn } = useUser();
 
   useEffect(() => {
     if (game) {
@@ -53,10 +53,12 @@ const ChessBoard: FunctionComponent<ChessBoardProps> = ({
 
   useEffect(() => {
     if (messages && messages.length > 0) {
+      console.log(messages[messages.length - 1]);
+
       const latest = JSON.parse(messages[messages.length - 1]);
 
       setPieces((latest as Game).pieces);
-
+      setMoves((latest as Game).moves);
       // Do some errorhandling
       if (!latest.errorMsg) {
       } else {
@@ -123,7 +125,9 @@ const ChessBoard: FunctionComponent<ChessBoardProps> = ({
 
     console.log("piece", piece);
 
-    sendMessage({ piece, target, jwt: getAccessToken() });
+    isLoggedIn
+      ? sendMessage({ piece, target, jwt: getAccessToken() })
+      : sendMessage({ piece, target, jwt: "", game: { ...game, moves } });
   }
   return (
     <>

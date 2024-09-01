@@ -25,6 +25,7 @@ const Square: FunctionComponent<SquareProps> = ({
     id: file + rank,
     data: { piece, rank, file },
   });
+
   const handleClick = (squareContext: SquareContext) => {
     onClick(squareContext);
     if (squareContext.piece) {

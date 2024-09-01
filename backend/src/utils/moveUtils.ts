@@ -273,7 +273,7 @@ export function validTurnOrder(
   const failConditions: boolean[] = [
     game.moves.length % 2 === 0 && pieceColor === "black",
     game.moves.length % 2 === 1 && pieceColor === "white",
-    // should be enabled later
+    // should be enabled later  
     // game.moves.length % 2 === 0 && game.playerWhiteId !== playerId,
     // game.moves.length % 2 === 1 && game.playerBlackId !== playerId,
   ];

@@ -52,6 +52,7 @@ export function UserProvider({ children }: UserProviderProps) {
 
   useEffect(() => {
     const token = localStorage.getItem(ACCESS_TOKEN);
+    // console.log("token", token);
 
     if (token) {
       const payload = JSON.parse(atob(token.split(".")[1])) as JWTPayload;
@@ -67,7 +68,6 @@ export function UserProvider({ children }: UserProviderProps) {
 
   const getAccessToken = useCallback(() => {
     const token = String(localStorage.getItem(ACCESS_TOKEN));
-    console.log(token);
 
     return token;
   }, []);

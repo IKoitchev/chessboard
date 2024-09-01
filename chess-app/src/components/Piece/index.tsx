@@ -22,7 +22,7 @@ const PieceIcon: FunctionComponent<PieceIconProps> = ({ piece }) => {
       ref={setNodeRef}
       {...listeners}
       {...attributes}
-      src={`/pieces/${piece.color}-${piece.type}.png`}
+      src={`/pieces/${piece.color}-${piece.type.toLowerCase()}.png`}
       style={{
         transform: `translate(${transform?.x ?? 0}px, ${transform?.y ?? 0}px)`,
         // zIndex: isDragging ? 2 : 1,

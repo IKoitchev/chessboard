@@ -30,36 +30,26 @@ export async function getCurrentGameHandler(ctx: RouterContext) {
 
   const game = await GameModel.findOne({
     where: {
-      [Op.or]: [{ playerWhiteId: sub }, { playerBlackId: sub }],
-      result: null,
+      [Op.and]: [
+        {
+          [Op.or]: [{ playerWhiteId: sub }, { playerBlackId: sub }],
+        },
+        {
+          [Op.or]: [
+            { result: { [Op.notLike]: "%win%" } },
+            { result: { [Op.is]: null } },
+          ],
+        },
+      ],
     },
     include: [MoveModel],
   });
 
   if (!game) {
-    const isWhite = true;
+    const { pieces } = initBoard();
 
-    const args = isWhite
-      ? {
-          playerBlackId: "7ba3adb3-961d-4bc1-9308-8b4fb2a1431d",
-          playerWhiteId: sub,
-        }
-      : {
-          playerBlackId: sub,
-          playerWhiteId: "7ba3adb3-961d-4bc1-9308-8b4fb2a1431d",
-        };
-
-    const initialPieces = generatePieces();
-
-    const practiceGame: Game = {
-      id: "practice",
-      moves: [],
-      pieces: initialPieces,
-      playerBlackId: null,
-      playerWhiteId: null,
-    };
-
-    ctx.body = { ...practiceGame };
+    ctx.body = { pieces };
+    return;
   } else {
     const position: Game = getCurrentPosition(game);
 
@@ -85,7 +75,7 @@ export async function getPastGameHandler(ctx: RouterContext) {
       where: {
         id: gameId,
         result: {
-          [Op.notLike]: "%win%",
+          [Op.like]: "%win%",
         },
       },
       include: [MoveModel],
@@ -160,4 +150,24 @@ export async function getPracticeGameHandler(ctx: RouterContext) {
   const { pieces } = initBoard();
 
   ctx.body = { pieces };
+}
+
+export async function startGameHandler(ctx: RouterContext) {
+  const { sub } = ctx.state.tokenInfo as JwtPayload;
+
+  const isWhite = true;
+
+  const args = isWhite
+    ? {
+        playerBlackId: "7ba3adb3-961d-4bc1-9308-8b4fb2a1431d",
+        playerWhiteId: sub,
+      }
+    : {
+        playerBlackId: sub,
+        playerWhiteId: "7ba3adb3-961d-4bc1-9308-8b4fb2a1431d",
+      };
+
+  const game = await GameModel.create({ ...args });
+
+  ctx.body = { ...game.dataValues };
 }

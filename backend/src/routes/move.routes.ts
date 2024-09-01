@@ -18,6 +18,7 @@ import {
 } from "../utils/moveUtils";
 import { makeMove } from "../utils/makeMove";
 import { JwtPayload } from "jsonwebtoken";
+import { generatePieces } from "../utils/initBoard";
 
 // Define a WebSocket middleware function
 const moveRoutes: Middleware = (ctx) => {
@@ -29,14 +30,19 @@ const moveRoutes: Middleware = (ctx) => {
       game: gameObj,
     } = JSON.parse(String(message)) as MoveRequest;
 
-    //its a practice game
+    // practice game
     if (gameObj && piece && target) {
       const position: Game = getCurrentPosition(gameObj);
 
       if (!validTurnOrder(position, piece.color)) {
         const errorMsg = `It is not ${piece.color} player's turn!`;
         ctx.websocket.send(
-          JSON.stringify({ errorMsg, status: 400, pieces: position.pieces })
+          JSON.stringify({
+            errorMsg,
+            status: 400,
+            pieces: position.pieces,
+            moves: [],
+          })
         );
         return;
       }
@@ -53,9 +59,19 @@ const moveRoutes: Middleware = (ctx) => {
       return;
     }
 
+    // real game
     if ([jwt, piece, target].some((prop) => !prop)) {
-      console.log("Validation failed", { jwt, piece, target });
-      ctx.websocket.send("Validation failed");
+      const errorMsg = "Validation failed";
+
+      console.log(errorMsg, { jwt, piece, target });
+      ctx.websocket.send(
+        JSON.stringify({
+          errorMsg,
+          status: 400,
+          pieces: generatePieces(),
+          moves: [],
+        })
+      );
       return;
     }
 
@@ -66,14 +82,28 @@ const moveRoutes: Middleware = (ctx) => {
     } catch (error) {
       const errorMsg = "Unauthorized";
       console.error(errorMsg);
-      ctx.websocket.send(JSON.stringify({ errorMsg }));
+      ctx.websocket.send(
+        JSON.stringify({ errorMsg, pieces: generatePieces() })
+      );
       return;
     }
 
     const game = await GameModel.findOne({
       where: {
-        [Op.or]: [{ playerWhiteId: token.sub }, { playerBlackId: token.sub }],
-        result: null,
+        [Op.and]: [
+          {
+            [Op.or]: [
+              { playerWhiteId: token.sub },
+              { playerBlackId: token.sub },
+            ],
+          },
+          {
+            [Op.or]: [
+              { result: { [Op.notLike]: "%win%" } },
+              { result: { [Op.is]: null } },
+            ],
+          },
+        ],
       },
       include: [
         { model: UserModel, as: "playerWhite" },
@@ -105,13 +135,13 @@ const moveRoutes: Middleware = (ctx) => {
       opposingColor(piece)
     );
 
-    if (gameState) {
-      await GameModel.update(
-        { result: gameState },
-        { where: { id: game.id }, returning: true }
-      );
-      afterMove.result = gameState;
-    }
+    await GameModel.update(
+      { result: gameState },
+      { where: { id: game.id }, returning: true }
+    );
+    afterMove.result = gameState;
+    // if (gameState) {
+    // }
 
     if (afterMove.moves.length != game.moves.length) {
       await MoveModel.create({

@@ -28,13 +28,12 @@ export default function PlayPage() {
   const handleStart = async () => {
     if (isLoggedIn) {
       axios
-        .get<Game>(`${baseURL}/chessboard/play`, {
+        .get<Game>(`${baseURL}/chessboard/start`, {
           headers: { authorization: `Bearer ${getAccessToken()}` },
         })
         .then((res) => {
           console.log(res.data);
-          console.log("naving", `/play/${res.data.id}`);
-          navigate(`/play/${res.data.id}`);
+          setGame(game);
         })
         .catch((err) => {
           console.log(err);
@@ -43,6 +42,7 @@ export default function PlayPage() {
   };
 
   useEffect(() => {
+    console.log(isLoggedIn ? "logged" : "not logged");
     if (isLoggedIn) {
       axios
         .get<Game>(`${baseURL}/chessboard/play`, {
@@ -68,14 +68,24 @@ export default function PlayPage() {
           console.log(err);
         });
     }
-  }, []);
+  }, [isLoggedIn]);
 
   return (
     <>
       {gameId ? null : (
         <>
-          <button onClick={handleReverse}>Reverse</button>
-          <button onClick={handleStart}>Start a game</button>
+          <button
+            className="mr-1 bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded"
+            onClick={handleReverse}
+          >
+            Switch POV
+          </button>
+          <button
+            className="ml-1 bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded"
+            onClick={handleStart}
+          >
+            Start a game
+          </button>
         </>
       )}
       <div className="w-max">
@@ -93,7 +103,7 @@ export default function PlayPage() {
           </>
         ) : null}
       </div>
-      <div className="w-1/2 inline-flex ">container 2</div>
+      <div className="w-1/2 inline-flex "></div>
     </>
   );
 }

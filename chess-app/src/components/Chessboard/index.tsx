@@ -33,23 +33,28 @@ const ChessBoard: FunctionComponent<ChessBoardProps> = ({
 
   const [pieces, setPieces] = useState<Piece[]>([]);
   const [selectedPiece, setSelectedPiece] = useState<Piece | null>(null);
-  const [error] = useState<string | null>(null);
   const [result, setResult] = useState<GameState>(null);
   const [moves, setMoves] = useState<Move[]>([]);
 
   const { sendMessage, isConnected, messages } = useWebSocket();
   const { getAccessToken, isLoggedIn } = useUser();
 
-  useEffect(() => {
-    if (game) {
-      console.log("setting pieces");
-      setPieces(game.pieces);
-    }
-  }, []);
+  // useEffect(() => {
+  //   if (game) {
+  //     console.log("setting pieces");
+  //     setPieces(game.pieces);
+  //   }
+  // }, []);
 
   useEffect(() => {
     console.log("pcs", pieces);
   }, [pieces]);
+
+  useEffect(() => {
+    console.log("changed", game);
+    console.log("setting pieces");
+    setPieces(game.pieces);
+  }, [game]);
 
   useEffect(() => {
     if (messages && messages.length > 0) {
@@ -58,11 +63,10 @@ const ChessBoard: FunctionComponent<ChessBoardProps> = ({
       const latest = JSON.parse(messages[messages.length - 1]);
 
       setPieces((latest as Game).pieces);
-      setMoves((latest as Game).moves);
-      // Do some errorhandling
-      if (!latest.errorMsg) {
-      } else {
+      if ((latest as Game).moves) {
+        setMoves((latest as Game).moves);
       }
+      // Do some errorhandling
     }
   }, [messages]);
 
@@ -131,7 +135,6 @@ const ChessBoard: FunctionComponent<ChessBoardProps> = ({
   }
   return (
     <>
-      {error ?? null}
       {result}
       {isConnected ? (
         <DndContext

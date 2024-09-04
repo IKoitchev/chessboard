@@ -2,7 +2,10 @@ import { Context } from "koa";
 
 import * as HttpStatus from "http-status-codes";
 
-export async function ErrorHandling(ctx: Context, next: () => Promise<any>) {
+export async function ErrorHandling(
+  ctx: Context,
+  next: () => Promise<unknown>
+) {
   try {
     await next();
   } catch (error) {

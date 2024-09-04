@@ -1,5 +1,3 @@
-import Router, { IRouterOptions } from "koa-router";
-
 import { Middleware } from "koa-websocket";
 import { MoveRequest } from "../dto";
 import { decodeJWT } from "../utils/auth/jwt";
@@ -41,7 +39,7 @@ const moveRoutes: Middleware = (ctx) => {
             errorMsg,
             status: 400,
             pieces: position.pieces,
-            moves: [],
+            moves: gameObj.moves,
           })
         );
         return;
@@ -81,7 +79,7 @@ const moveRoutes: Middleware = (ctx) => {
       token = decodeJWT(jwt);
     } catch (error) {
       const errorMsg = "Unauthorized";
-      console.error(errorMsg);
+      console.error(errorMsg, error);
       ctx.websocket.send(
         JSON.stringify({ errorMsg, pieces: generatePieces() })
       );

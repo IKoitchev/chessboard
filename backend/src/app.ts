@@ -1,5 +1,4 @@
 import Koa from "koa";
-import * as HttpStatus from "http-status-codes";
 import cors from "@koa/cors";
 import bodyParser from "koa-bodyparser";
 import logger from "koa-logger";
@@ -9,7 +8,6 @@ import chessRoutes from "./routes/chess.routes";
 import websockify from "koa-websocket";
 import moveRoutes from "./routes/move.routes";
 import { ErrorHandling } from "./middleware/errorHandling.middleware";
-// const app: Koa = new Koa();
 
 const app = websockify(new Koa());
 

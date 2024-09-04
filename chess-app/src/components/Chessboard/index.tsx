@@ -58,13 +58,15 @@ const ChessBoard: FunctionComponent<ChessBoardProps> = ({
 
   useEffect(() => {
     if (messages && messages.length > 0) {
-      console.log(messages[messages.length - 1]);
+      // console.log(messages[messages.length - 1]);
 
       const latest = JSON.parse(messages[messages.length - 1]);
 
-      setPieces((latest as Game).pieces);
-      if ((latest as Game).moves) {
-        setMoves((latest as Game).moves);
+      console.log(latest.pieces.length);
+
+      setPieces(latest.pieces);
+      if (latest.moves && latest.moves.length > 0) {
+        setMoves(latest.moves);
       }
       // Do some errorhandling
     }
@@ -131,7 +133,12 @@ const ChessBoard: FunctionComponent<ChessBoardProps> = ({
 
     isLoggedIn
       ? sendMessage({ piece, target, jwt: getAccessToken() })
-      : sendMessage({ piece, target, jwt: "", game: { ...game, moves } });
+      : sendMessage({
+          piece,
+          target,
+          jwt: "",
+          game: { ...game, moves, pieces },
+        });
   }
   return (
     <>

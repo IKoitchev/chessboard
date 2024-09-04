@@ -2,9 +2,6 @@ import { Sequelize } from "sequelize-typescript";
 import { describe, expect, it } from "vitest";
 
 import { createJWTResponse, decodeJWT } from "./jwt";
-import { JwtPayload } from "jsonwebtoken";
-
-let sequelize: Sequelize;
 
 describe("JWT", () => {
   it("should create jwt response", () => {

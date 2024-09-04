@@ -1,7 +1,8 @@
-import { Color, Piece, Game, Square, GameState } from "@chessboard/types";
+import { Color, Piece, Game, Square, GameState, Move } from "@chessboard/types";
 import { generatePieces } from "./initBoard";
 import { Game as GameModel } from "../models/game";
 import {
+  findEnPassant,
   getDiagonalMoves,
   getHorizontalAndVerticalMoves,
   getLMoves,
@@ -95,6 +96,20 @@ export function getCurrentPosition(game: Game | GameModel): Game {
         ...current[rookIndex],
         file: shortCastle ? "f" : "d",
       };
+    }
+
+    if (piece.type === "Pawn") {
+      const enPassantMove = findEnPassant(
+        game as Game,
+        piece,
+        (moves as Move[]).indexOf(move) - 1
+      );
+      if (enPassantMove) {
+        //remove the pawn captured by enpassant
+        current = current.filter(
+          (p) => !(p.file === enPassantMove.file && p.rank === piece.rank)
+        );
+      }
     }
   }
 
@@ -273,7 +288,7 @@ export function validTurnOrder(
   const failConditions: boolean[] = [
     game.moves.length % 2 === 0 && pieceColor === "black",
     game.moves.length % 2 === 1 && pieceColor === "white",
-    // should be enabled later  
+    // should be enabled later
     // game.moves.length % 2 === 0 && game.playerWhiteId !== playerId,
     // game.moves.length % 2 === 1 && game.playerBlackId !== playerId,
   ];

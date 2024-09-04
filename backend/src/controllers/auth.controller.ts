@@ -1,4 +1,4 @@
-import Router, { RouterContext } from "koa-router";
+import { RouterContext } from "koa-router";
 import { UserDto } from "../dto";
 import { isValidEmail } from "../utils/auth/email";
 import { compareSync, hashSync } from "bcrypt";

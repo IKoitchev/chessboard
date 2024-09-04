@@ -1,4 +1,4 @@
-import Router, { IRouterOptions, RouterContext } from "koa-router";
+import Router, { IRouterOptions } from "koa-router";
 import {
   emailLoginHandler,
   emailRegisterHandler,

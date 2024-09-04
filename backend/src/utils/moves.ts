@@ -1,12 +1,7 @@
-import { Game, Move, Piece, Square, type File } from "@chessboard/types";
+import { Game, Piece, Square } from "@chessboard/types";
 import { letters, numbers } from "./squares";
 import { CalcMove } from "src/dto";
-import {
-  squareHasPiece,
-  legalMoves as getLegalMoves,
-  checkIfCheck,
-} from "./moveUtils";
-import { Rook } from "../types/Pieces";
+import { squareHasPiece, legalMoves as getLegalMoves } from "./moveUtils";
 
 export function getHorizontalAndVerticalMoves(ctx: CalcMove) {
   const {
@@ -508,7 +503,7 @@ export function getCastleSquares(game: Game, king: Piece): Square[] {
       }
     }
   }
-  let kingSquares: Square[] = [];
+  const kingSquares: Square[] = [];
 
   for (const rookSq of castleRookSquare) {
     const kingFileIndex = letters.indexOf(king.file);
@@ -526,6 +521,50 @@ export function getCastleSquares(game: Game, king: Piece): Square[] {
   return kingSquares;
 }
 
-export function enPassant() {}
+export function findEnPassant(
+  game: Game,
+  piece: Piece,
+  moveNumber?: number
+): Square | null {
+  if (piece.type !== "Pawn") {
+    return null;
+  }
+
+  if (moveNumber < 0) {
+    return null;
+  }
+
+  if (!game.moves || game.moves.length === 0) {
+    return null;
+  }
+
+  const lastMove = moveNumber ? game.moves[moveNumber] : game.moves.at(-1);
+  const targetPiece: Piece = JSON.parse(lastMove.piece);
+
+  const failConditions = [
+    targetPiece.type !== "Pawn",
+    Math.abs(
+      letters.indexOf(piece.file) - letters.indexOf(lastMove.targetFile)
+    ) !== 1,
+    (piece.color === "white" && piece.rank !== "5") ||
+      (piece.color === "black" && piece.rank !== "4"),
+    (targetPiece.color === "white" && lastMove.targetRank !== "4") ||
+      (targetPiece.color === "black" && lastMove.targetRank !== "5"),
+    Math.abs(
+      numbers.indexOf(targetPiece.rank) - numbers.indexOf(lastMove.targetRank)
+    ) !== 2,
+  ];
+
+  if (failConditions.some(Boolean)) {
+    return null;
+  }
+
+  const targetSquare: Square = {
+    file: lastMove.targetFile,
+    rank: targetPiece.color == "white" ? "3" : "6",
+  };
+
+  return targetSquare;
+}
 
 export function promote() {}

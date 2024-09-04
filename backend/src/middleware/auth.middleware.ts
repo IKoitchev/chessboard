@@ -3,7 +3,7 @@ import { JwtPayload, verify } from "jsonwebtoken";
 
 const secret = process.env.SECRET ?? "secret";
 
-export async function authorize(ctx: Context, next: () => Promise<any>) {
+export async function authorize(ctx: Context, next: () => Promise<unknown>) {
   const {
     headers: { authorization },
   } = ctx.request;

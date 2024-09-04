@@ -2,11 +2,10 @@ import Router, { IRouterOptions, RouterContext } from "koa-router";
 import {
   getCurrentGameHandler,
   getPracticeGameHandler,
-  makeMoveHandler,
   startGameHandler,
 } from "../controllers/chess.controller";
 import { authorize } from "../middleware/auth.middleware";
-import { Game as GameModel, Move as MoveModel } from "../models";
+import { Game as GameModel } from "../models";
 
 const routerOpts: IRouterOptions = {
   prefix: "/chessboard",

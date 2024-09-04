@@ -5,7 +5,6 @@ import path from "path";
 import { closeTestApp, request, setTestApp } from "axios-test-instance";
 import app from "../app";
 import { UserDto } from "../dto";
-import { hashSync } from "bcrypt";
 
 let sequelize: Sequelize;
 

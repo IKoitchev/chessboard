@@ -6,7 +6,6 @@ import {
   Default,
   ForeignKey,
   HasMany,
-  HasOne,
   IsUUID,
   Model,
   PrimaryKey,

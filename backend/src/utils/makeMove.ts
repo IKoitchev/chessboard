@@ -6,7 +6,7 @@ import {
   legalMoves as getLegalMoves,
   checkIfCheck,
 } from "./moveUtils";
-import { getCastleSquares } from "./moves";
+import { findEnPassant, getCastleSquares } from "./moves";
 
 export function makeMove(piece: Piece, target: Square, game: Game): Game {
   const options: CalcMove = {
@@ -20,8 +20,11 @@ export function makeMove(piece: Piece, target: Square, game: Game): Game {
 
   const legalMoves = getLegalMoves(piece, options);
 
+  const enPassantMove = findEnPassant(game, piece);
+
   const castleOptions = getCastleSquares(game, piece);
 
+  // castle
   if (
     castleOptions.find(
       (sq) => sq.file === target.file && sq.rank === target.rank
@@ -48,7 +51,30 @@ export function makeMove(piece: Piece, target: Square, game: Game): Game {
       file: short ? "f" : "c",
     };
   }
-  /////
+  // enpassant
+  else if (
+    enPassantMove &&
+    enPassantMove.file === target.file &&
+    enPassantMove.rank === target.rank
+  ) {
+    // move the pawn
+    updatedPieces[
+      updatedPieces.findIndex(
+        (p) => p.file === piece.file && p.rank === piece.rank
+      )
+    ] = { ...piece, ...target };
+
+    //remove the captured pawn
+
+    updatedPieces = updatedPieces.filter(
+      (p) => !(p.file === enPassantMove.file && p.rank === piece.rank)
+    );
+
+    if (checkIfCheck(updatedPieces, piece.color)) {
+      return game;
+    }
+  }
+  //Normal moves
   else {
     if (
       !legalMoves.find((m) => m.file === target.file && m.rank === target.rank)

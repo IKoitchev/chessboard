@@ -1,6 +1,6 @@
 import { Game } from "@chessboard/types";
 import { RouterContext } from "koa-router";
-import { generatePieces, initBoard } from "../utils/initBoard";
+import { initBoard } from "../utils/initBoard";
 import { MakeMoveContext } from "src/dto";
 import { makeMove } from "../utils/makeMove";
 import { Game as GameModel } from "../models/game";

@@ -1,5 +1,5 @@
 import { JWTOptions, TokenResponse } from "@chessboard/types";
-import { decode, JwtPayload, sign, verify } from "jsonwebtoken";
+import { JwtPayload, sign, verify } from "jsonwebtoken";
 
 const secret = process.env.SECRET ?? "secret";
 const host = process.env.HOST ?? "http://localhost:3000";

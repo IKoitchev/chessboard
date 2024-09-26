@@ -98,10 +98,13 @@ export type WsMessage = {
   jwt: string;
 };
 
+export type Promotable = "Queen" | "Knight" | "Rook" | "Bishop";
+
 export type MoveRequest = WsMessage & {
   piece: Piece;
   target: Square;
   game?: Game;
+  promoteTo?: Promotable;
 };
 
 export type MoveResponse = Game;

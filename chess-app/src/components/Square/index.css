@@ -28,3 +28,9 @@
 .selected {
   background-color: #eb4528;
 }
+
+select {
+  width: 100%;
+}
+
+select#gender option[value="first"]   { background-image:url("../../../public/pieces/black-queen.png");   }

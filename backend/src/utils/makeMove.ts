@@ -1,14 +1,21 @@
 import { Game, Move, Piece, Square } from "@chessboard/types";
-import { CalcMove } from "src/dto";
+import { CalcMove, Promotable } from "src/dto";
 
 import {
   squareHasPiece,
   legalMoves as getLegalMoves,
   checkIfCheck,
+  movePieceTo,
+  makePromotion,
 } from "./moveUtils";
 import { findEnPassant, getCastleSquares } from "./moves";
 
-export function makeMove(piece: Piece, target: Square, game: Game): Game {
+export function makeMove(
+  piece: Piece,
+  target: Square,
+  game: Game,
+  promoteTo?: Promotable
+): Game {
   const options: CalcMove = {
     start: { rank: piece.rank, file: piece.file },
     pieces: game.pieces,
@@ -16,6 +23,7 @@ export function makeMove(piece: Piece, target: Square, game: Game): Game {
   };
 
   let updatedPieces = [...game.pieces];
+
   const targetPiece = squareHasPiece(target, game.pieces);
 
   const legalMoves = getLegalMoves(piece, options);
@@ -30,11 +38,12 @@ export function makeMove(piece: Piece, target: Square, game: Game): Game {
       (sq) => sq.file === target.file && sq.rank === target.rank
     )
   ) {
-    updatedPieces[
-      updatedPieces.findIndex(
-        (p) => p.file === piece.file && p.rank === piece.rank
-      )
-    ] = { ...piece, ...target };
+    updatedPieces = movePieceTo(game.pieces, piece, target);
+    // updatedPieces[
+    //   updatedPieces.findIndex(
+    //     (p) => p.file === piece.file && p.rank === piece.rank
+    //   )
+    // ] = { ...piece, ...target };
 
     const short = target.file === "g";
 
@@ -44,12 +53,18 @@ export function makeMove(piece: Piece, target: Square, game: Game): Game {
         p.rank === piece.rank &&
         p.file === (short ? "h" : "a")
     );
+    const rook = updatedPieces[rookIndex];
 
-    updatedPieces[rookIndex] = {
-      ...updatedPieces[rookIndex],
+    // updatedPieces[rookIndex] = {
+    //   ...updatedPieces[rookIndex],
+    //   rank: target.rank,
+    //   file: short ? "f" : "c",
+    // };
+
+    updatedPieces = movePieceTo(updatedPieces, rook, {
       rank: target.rank,
       file: short ? "f" : "c",
-    };
+    });
   }
   // enpassant
   else if (
@@ -109,6 +124,12 @@ export function makeMove(piece: Piece, target: Square, game: Game): Game {
     // If moving player is in check, move is not legal
     if (checkIfCheck(updatedPieces, piece.color)) {
       return game;
+    }
+
+    let afterMove = { ...game, pieces: updatedPieces };
+    if (piece.type === "Pawn") {
+      afterMove = makePromotion({ ...afterMove }, piece, promoteTo);
+      updatedPieces = afterMove.pieces;
     }
   }
   // This is not used, but we need to create a move here

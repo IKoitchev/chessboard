@@ -22,10 +22,12 @@ export type UserDto = {
   primaryEmail: string;
   password: string;
 };
-
+export type Promotable = "Queen" | "Knight" | "Rook" | "Bishop";
 export type MoveRequest = {
   piece: Piece;
   target: Square;
   jwt: string;
   game: Game;
+
+  promoteTo?: Promotable;
 };

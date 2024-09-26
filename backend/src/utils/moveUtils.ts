@@ -9,6 +9,7 @@ import {
   getPawnMoves,
 } from "./moves";
 import { CalcMove } from "../dto";
+import { Bishop, Knight, Queen, Rook } from "../types/Pieces";
 
 /**
  * Check if there is a piece on a given square
@@ -296,4 +297,68 @@ export function validTurnOrder(
   if (failConditions.some(Boolean)) return false;
 
   return true;
+}
+
+export function makePromotion(
+  position: Game,
+  pawn: Piece,
+  promoteTo: string
+): Game {
+  if (
+    (pawn.color === "white" && pawn.rank !== "7") ||
+    (pawn.color === "black" && pawn.rank !== "2")
+  ) {
+    return position;
+  }
+
+  const promotions = ["Queen", "Rook", "Bishop", "Knight"];
+
+  if (!promotions.includes(promoteTo)) {
+    return position;
+  }
+
+  let newPiece: Piece;
+
+  const promSquare: Square = {
+    file: pawn.file,
+    rank: pawn.color === "white" ? "8" : "1",
+  };
+
+  switch (promoteTo) {
+    case "Rook":
+      newPiece = new Rook(promSquare, pawn.color);
+      break;
+    case "Bishop":
+      newPiece = new Bishop(promSquare, pawn.color);
+      break;
+    case "Knight":
+      newPiece = new Knight(promSquare, pawn.color);
+      break;
+    default:
+      newPiece = new Queen(promSquare, pawn.color);
+  }
+
+  const updatedPieces = position.pieces.filter(
+    (p) => !(p.rank === pawn.rank && p.file === pawn.file)
+  );
+
+  updatedPieces.push(newPiece);
+
+  return { ...position, pieces: updatedPieces };
+}
+
+export function movePieceTo(
+  pieces: Piece[],
+  piece: Piece,
+  square: Square
+): Piece[] {
+  const updatedPieces = [...pieces];
+
+  updatedPieces[
+    updatedPieces.findIndex(
+      (p) => p.file === piece.file && p.rank === piece.rank
+    )
+  ] = { ...piece, ...square };
+
+  return updatedPieces;
 }

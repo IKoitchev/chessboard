@@ -26,6 +26,7 @@ const moveRoutes: Middleware = (ctx) => {
       piece,
       target,
       game: gameObj,
+      promoteTo,
     } = JSON.parse(String(message)) as MoveRequest;
 
     // practice game
@@ -45,7 +46,12 @@ const moveRoutes: Middleware = (ctx) => {
         return;
       }
 
-      const afterMove: Game = makeMove(piece, target, { ...position });
+      const afterMove: Game = makeMove(
+        piece,
+        target,
+        { ...position },
+        promoteTo
+      );
 
       const gameState = checkIfMateOrStalemate(
         afterMove.pieces,
@@ -126,7 +132,7 @@ const moveRoutes: Middleware = (ctx) => {
       return;
     }
 
-    const afterMove: Game = makeMove(piece, target, { ...position });
+    const afterMove: Game = makeMove(piece, target, { ...position }, promoteTo);
 
     const gameState = checkIfMateOrStalemate(
       afterMove.pieces,

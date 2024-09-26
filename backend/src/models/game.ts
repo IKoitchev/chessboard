@@ -14,6 +14,7 @@ import {
 
 import { Move } from "./move";
 import { User } from "./user";
+import { Piece } from "@chessboard/types";
 
 @Table({ tableName: "Game" })
 export class Game extends Model {

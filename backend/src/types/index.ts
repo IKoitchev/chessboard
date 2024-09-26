@@ -32,8 +32,14 @@ declare module "@chessboard/types" {
     moves: Move[];
     result?: GameState;
   };
-  type Player = {
+  type User = {
     id: string;
+    primaryEmail: string;
+    username: string;
+    password: string;
+    currentGame: Game;
+    blackGames: Game[];
+    whiteGames: Game[];
   };
   type Move = {
     id: string;

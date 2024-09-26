@@ -2,6 +2,7 @@ import { type FunctionComponent, useEffect, useState } from "react";
 import "./index.css";
 import {
   Move,
+  Promotable,
   type Game,
   type GameState,
   type Piece,
@@ -35,16 +36,13 @@ const ChessBoard: FunctionComponent<ChessBoardProps> = ({
   const [selectedPiece, setSelectedPiece] = useState<Piece | null>(null);
   const [result, setResult] = useState<GameState>(null);
   const [moves, setMoves] = useState<Move[]>([]);
+  const [promSquare, setPromSquare] = useState<Square | null>(null);
+
+  // The moving pawn, before the move
+  const [promPiece, setPromPiece] = useState<Piece | null>(null);
 
   const { sendMessage, isConnected, messages } = useWebSocket();
   const { getAccessToken, isLoggedIn } = useUser();
-
-  // useEffect(() => {
-  //   if (game) {
-  //     console.log("setting pieces");
-  //     setPieces(game.pieces);
-  //   }
-  // }, []);
 
   useEffect(() => {
     console.log("pcs", pieces);
@@ -55,6 +53,10 @@ const ChessBoard: FunctionComponent<ChessBoardProps> = ({
     console.log("setting pieces");
     setPieces(game.pieces);
   }, [game]);
+
+  useEffect(() => {
+    console.log("promSquare", promSquare);
+  }, [promSquare]);
 
   useEffect(() => {
     if (messages && messages.length > 0) {
@@ -93,11 +95,34 @@ const ChessBoard: FunctionComponent<ChessBoardProps> = ({
     }
   };
 
+  const handleSelectProm = async (promoteTo: Promotable) => {
+    console.log(promoteTo);
+
+    debugger;
+
+    isLoggedIn
+      ? sendMessage({
+          piece: selectedPiece!,
+          target: promSquare!,
+          jwt: getAccessToken(),
+          promoteTo,
+        })
+      : sendMessage({
+          piece: selectedPiece!,
+          target: promSquare!,
+          jwt: "",
+          game: { ...game, moves, pieces },
+          promoteTo,
+        });
+
+    setSelectedPiece(null);
+  };
+
   const dragMove = async (event: DragMoveEvent) => {
     console.log("dragMove");
     const movingPiece = event.active.data.current as Piece;
     const target = event.over?.data.current as Square;
-
+    // debugger;
     if (!target) {
       return;
     }
@@ -115,12 +140,26 @@ const ChessBoard: FunctionComponent<ChessBoardProps> = ({
 
     // Update the UI before the request to avoid glitching of pieces
     const piecesCopy = [...pieces];
+    console.log("mp", movingPiece);
     piecesCopy[index] = { ...movingPiece, ...target };
     console.log(piecesCopy);
     setPieces(piecesCopy);
+    setSelectedPiece(movingPiece);
 
     move(movingPiece, target);
-    setSelectedPiece(null);
+    console.log("selected before move", selectedPiece);
+
+    console.log(movingPiece?.type, movingPiece?.color, target.rank);
+
+    if (
+      !(
+        movingPiece?.type === "Pawn" &&
+        ((movingPiece?.color === "black" && target.rank === "1") ||
+          (movingPiece?.color === "white" && target.rank === "8"))
+      )
+    ) {
+      setSelectedPiece(null);
+    }
   };
 
   function move(piece: Piece, target: Square) {
@@ -131,14 +170,24 @@ const ChessBoard: FunctionComponent<ChessBoardProps> = ({
 
     console.log("piece", piece);
 
-    isLoggedIn
-      ? sendMessage({ piece, target, jwt: getAccessToken() })
-      : sendMessage({
-          piece,
-          target,
-          jwt: "",
-          game: { ...game, moves, pieces },
-        });
+    // Prom
+    if (
+      (piece.color === "black" &&
+        target.rank === "1" &&
+        piece.type === "Pawn") ||
+      (piece.color === "white" && target.rank === "8" && piece.type === "Pawn")
+    ) {
+      setPromSquare({ file: piece.file, rank: target.rank });
+    } else {
+      isLoggedIn
+        ? sendMessage({ piece, target, jwt: getAccessToken() })
+        : sendMessage({
+            piece,
+            target,
+            jwt: "",
+            game: { ...game, moves, pieces },
+          });
+    }
   }
   return (
     <>
@@ -165,6 +214,15 @@ const ChessBoard: FunctionComponent<ChessBoardProps> = ({
                           rank={number}
                           piece={findPieceBySquare(pieces, letter, number)}
                           onClick={handleClick}
+                          isPromoting={
+                            letter === promSquare?.file &&
+                            number === promSquare.rank &&
+                            findPieceBySquare(pieces, letter, number)?.type ===
+                              "Pawn"
+                          }
+                          onSelectProm={(promoteTo) =>
+                            handleSelectProm(promoteTo)
+                          }
                         />
                       );
                     }

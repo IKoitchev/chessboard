@@ -754,6 +754,16 @@ describe("Moves", () => {
 
       expect(moves).toEqual(expect.arrayContaining(expected));
     });
+
+    it("should promote", () => {
+      const piece: Piece = {
+        file: "c",
+        rank: "8",
+        color: "white",
+        points: 1,
+        type: "Pawn",
+      };
+    });
   });
   describe("King", () => {
     it("should move on adjacent squares only", () => {

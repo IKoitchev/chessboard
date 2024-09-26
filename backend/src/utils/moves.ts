@@ -289,28 +289,32 @@ export function getLMoves(ctx: CalcMove) {
   return moves;
 }
 
-export function getPawnMoves(mvoeInput: CalcMove) {
+export function getPawnMoves(moveInput: CalcMove) {
   const {
     start: { rank, file },
     color: pieceColor,
     pieces,
-  } = mvoeInput;
+  } = moveInput;
   const moves: Square[] = [];
 
   // startRankIndex, promRankIndex, captureOffset
   const [startRankIndex, moveOffset] =
     pieceColor === "white" ? [1, 1] : [6, -1];
 
+  const rankIndex = numbers.indexOf(rank);
+
   const isBlocked = (moveOffset: number) => {
     if (
       pieces.find(
         (p) =>
-          p.file === file &&
-          numbers.indexOf(p.rank) === numbers.indexOf(rank) + moveOffset
-      )
+          p.file === file && numbers.indexOf(p.rank) === rankIndex + moveOffset
+      ) ||
+      rankIndex + moveOffset >= numbers.length ||
+      rankIndex + moveOffset < 0
     ) {
       return true;
     }
+
     return false;
   };
 
@@ -566,5 +570,3 @@ export function findEnPassant(
 
   return targetSquare;
 }
-
-export function promote() {}

@@ -1,4 +1,5 @@
 import {
+  AllowNull,
   BelongsTo,
   Column,
   DataType,
@@ -10,7 +11,7 @@ import {
   Table,
 } from "sequelize-typescript";
 import { Game } from "./game";
-import { Rank, File } from "@chessboard/types";
+import { Rank, File, MoveType } from "@chessboard/types";
 
 @Table({ tableName: "Move", createdAt: false, updatedAt: false })
 export class Move extends Model {
@@ -30,6 +31,10 @@ export class Move extends Model {
 
   @Column(DataType.STRING)
   declare targetFile: File;
+
+  @AllowNull(true)
+  @Column(DataType.STRING)
+  declare moveType: MoveType;
 
   @Column(DataType.JSON)
   declare piece: string;

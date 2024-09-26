@@ -111,6 +111,15 @@ export function getCurrentPosition(game: Game | GameModel): Game {
           (p) => !(p.file === enPassantMove.file && p.rank === piece.rank)
         );
       }
+
+      // promotion
+      if (["Queen", "Knight", "Bishop", "Rook"].includes(move.moveType)) {
+        current = makePromotion(
+          { ...(game as Game), pieces: current },
+          piece,
+          move.moveType
+        ).pieces;
+      }
     }
   }
 
@@ -339,7 +348,8 @@ export function makePromotion(
   }
 
   const updatedPieces = position.pieces.filter(
-    (p) => !(p.rank === pawn.rank && p.file === pawn.file)
+    (p) =>
+      !(p.rank === (pawn.color === "white" ? "8" : "1") && p.file === pawn.file)
   );
 
   updatedPieces.push(newPiece);

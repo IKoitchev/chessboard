@@ -21,6 +21,7 @@ export function makeMove(
     pieces: game.pieces,
     color: piece.color,
   };
+  let didPromote = false;
 
   let updatedPieces = [...game.pieces];
 
@@ -100,7 +101,12 @@ export function makeMove(
     // Check if anything is captured
     if (targetPiece) {
       updatedPieces = updatedPieces.filter(
-        (p) => !(p.file === targetPiece.file && p.rank === targetPiece.rank)
+        (p) =>
+          !(
+            p.file === targetPiece.file &&
+            p.rank === targetPiece.rank &&
+            p.color === targetPiece.color
+          )
       );
     }
 
@@ -130,6 +136,7 @@ export function makeMove(
     if (piece.type === "Pawn") {
       afterMove = makePromotion({ ...afterMove }, piece, promoteTo);
       updatedPieces = afterMove.pieces;
+      didPromote = true;
     }
   }
   // This is not used, but we need to create a move here
@@ -142,6 +149,7 @@ export function makeMove(
     piece: JSON.stringify(piece),
     targetFile: target.file,
     targetRank: target.rank,
+    moveType: didPromote ? promoteTo : null,
   };
 
   const updatedGame: Game = {

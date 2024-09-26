@@ -47,6 +47,7 @@ declare module "@chessboard/types" {
     targetRank: Rank;
     piece: string;
     gameId: string;
+    moveType?: MoveType;
   };
   type GameState =
     | "draw"
@@ -63,7 +64,7 @@ export type JWTOptions = {
   scope?: string;
 };
 
-export interface TokenResponse {
+export type TokenResponse = {
   /**
    * The bearer access token to use for authenticating requests.
    */
@@ -87,4 +88,13 @@ export interface TokenResponse {
   refresh_token?: string;
 
   token_type: "bearer";
-}
+};
+
+export type MoveType =
+  | null
+  | "castle"
+  | "enpassant"
+  | "Knight"
+  | "Bishop"
+  | "Queen"
+  | "Rook";

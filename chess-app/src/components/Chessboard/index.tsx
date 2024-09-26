@@ -60,8 +60,6 @@ const ChessBoard: FunctionComponent<ChessBoardProps> = ({
 
   useEffect(() => {
     if (messages && messages.length > 0) {
-      // console.log(messages[messages.length - 1]);
-
       const latest = JSON.parse(messages[messages.length - 1]);
 
       console.log(latest.pieces.length);
